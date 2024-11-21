@@ -31,6 +31,7 @@ library(enrichplot)
 library(ggpubr)
 library(maxstat)
 library(org.Hs.eg.db)
+library(stats)
 
 
 
@@ -115,9 +116,9 @@ ui <- fluidPage(
 
       conditionalPanel(
         condition = "input.survival_analysis == true",
-        helpText("Specify the variable and time for survival analysis. Example: 'Recurrence_01' and 'time_to_recurrence'."),
-        textInput("variable_01", "Variable 01"),
-        textInput("time", "Time"),
+        helpText("Specify the variable and time for survival analysis. Example: 'Recurrence_01' and 'Time_to_death_surv'."),
+        textInput("variable_01", "Variable 01", "Recurrence_01"),
+        textInput("time", "Time", "Time_to_death_surv"),
         textInput("genes_to_use", "Genes to use", "CCND1,MMP10,CTTN")
       ),
 
@@ -146,6 +147,9 @@ ui <- fluidPage(
       ),
       textOutput("dimension_output"),
       textOutput("dimension_output1"),
+      # RESULTS QC
+      tabsetPanel(
+        tabPanel("Quality Control",
       tableOutput("summary_stats"),
       tableOutput("ratiosb"),
       downloadButton("download_summary", "Download Summary Stats"),
@@ -163,14 +167,17 @@ ui <- fluidPage(
       plotOutput("med"),
       downloadButton("download_med_plot", "Download Median Plot (PDF)"),
       plotOutput("qc_plot_heatmap"),
-      downloadButton("download_qc_plot_heatmap", "Download QC Heatmap PDF"),
+      downloadButton("download_qc_plot_heatmap", "Download QC Heatmap PDF")
+      ),
+      # RESULTS DEA
+      tabPanel("Differential Expresion Analisis",
       verbatimTextOutput("error_design_formula"),
       textOutput("filtering_data"),
       textOutput("removing_outliers"),
       textOutput("missatge2"),
       verbatimTextOutput("dds_output"),
-      #verbatimTextOutput("vsd_output"),
-      #textOutput("results_VST"),
+      verbatimTextOutput("vsd_output"),
+      textOutput("results_VST"),
       textOutput("missatge3"),
       plotOutput("DEA_heatmap"),
       downloadButton("DEA_heatmap_download", "Download HEATMAP (PDF)"),
@@ -206,7 +213,10 @@ ui <- fluidPage(
       downloadButton("downloadvolvano", "Download Volcano plot"),
       textOutput("missatge10"),
       plotOutput("dispersion"),
-      downloadButton("downloaddispersion", "Download Dispersion plot"),
+      downloadButton("downloaddispersion", "Download Dispersion plot")
+      ),
+      # RESULTS GSEA
+      tabPanel("Tumor Microenvironment",
       plotOutput("dotplot1"),
       downloadButton("download_dotplot1", "Download Dotplot GSEA 1"),
       plotOutput("dotplot2"),
@@ -236,7 +246,10 @@ ui <- fluidPage(
       plotOutput("go_bar_plot"),
       downloadButton("download_go_bar_plot", "Download GO Bar Plot"),
       plotOutput("go_bar_plot2"),
-      downloadButton("download_go_bar_plot2", "Download GO Bar Plot"),
+      downloadButton("download_go_bar_plot2", "Download GO Bar Plot")
+      ),
+      # RESULTS TPM
+      tabPanel("Tumor Microenvironment",
       textOutput("initial_message"),
       textOutput("normalization_message"),
       tableOutput("tpm_table"),
@@ -262,6 +275,25 @@ ui <- fluidPage(
       downloadButton("download_heatmap_EPIC", "Download Heatmap EPIC"),
       plotOutput("heatmap_xcell"),
       downloadButton("download_heatmap_xcell", "Download Heatmap xcell")
+      ),
+      # SURVIVAL
+      tabPanel("Survival Analysis",
+               textOutput("normalizing"),
+               textOutput("logrank"),
+               textOutput("checkduplicates"),
+               textOutput("duplicatesfound"),
+               textOutput("noduplicates"),
+               textOutput("top10"),
+               textOutput("startingsurvival"),
+               textOutput("cutoffmessage"),
+               textOutput("summaryfit"),
+               tableOutput("fit1_df"),
+               downloadButton("download_fit1_df", "Download Fit1 Table"),
+               verbatimTextOutput("surv_diff_output"),
+               textOutput("survival")
+
+      )
+    )
     )
   )
 )
@@ -272,25 +304,6 @@ ui <- fluidPage(
 
 # Servidor para la aplicación
 server <- function(input, output, session) {
-  library(shiny)
-  library(shinythemes)
-  library(readxl)
-  # library(IOBR) ## an error has occur
-  library(immunedeconv)
-  # library(EPIC)
-  # library(xCell)
-  library(ggplot2)
-  library(reshape2)
-  library(DESeq2)
-  ### fins aqui finsionava.
-  library(pheatmap)
-  ##
-  library(PoiClaClu)
-  library(grid)
-  library(stats)
-  library(grDevices)
-
-  library(EnhancedVolcano)
   observeEvent(input$file_type, {
     if (input$file_type == "RNAseq") {
       updateCheckboxInput(session, "QC", value = FALSE)
@@ -933,7 +946,6 @@ server <- function(input, output, session) {
       annotation_col <- data.frame(SampleID = sample_ids)
       rownames(annotation_col) <- colnames(vsd_cor)
       #### LAIA fins aqui va.
-      cat("1")
 
 
       aa<- pheatmap::pheatmap(vsd_cor,
@@ -941,7 +953,6 @@ server <- function(input, output, session) {
                              display_numbers = FALSE,
                              annotation_col = annotation_col,
                              annotation_legend = FALSE)
-      cat("2")
       output$correlation_heatmap <- renderPlot({print(aa)})
 
       output$download_correlation_heatmap <- downloadHandler(
@@ -952,44 +963,36 @@ server <- function(input, output, session) {
           dev.off()
         }
       )
-      cat("3")
 
 ##### LAIA problemes amb poiclaclu
-      # # Calcular la distancia de Poisson
-      # pois_distance <- PoiClaClu::PoissonDistance(t(DESeq2::counts(dds, normalized = TRUE)))
-      # cat("4")
-      # samplePoisDistMatrix <- as.matrix(pois_distance$dd)
-      # cat("5")
-      # sample_ids <- dds$id
-      # cat("6")
-      # colnames(samplePoisDistMatrix) <- sample_ids
-      # cat("4")
-      # rownames(samplePoisDistMatrix) <- sample_ids
-      # cat("4")
-      # colors <- grDevices::colorRampPalette(c("white", "#4793AF", "#013649"))(255)
-      #
-      # output$missatge4 <- renderText({"GENERATING POISSON DISTANCES PLOT"})
+      # Calcular la distancia de Poisson
+      pois_distance <- PoiClaClu::PoissonDistance(t(DESeq2::counts(dds, normalized = TRUE)))
+      samplePoisDistMatrix <- as.matrix(pois_distance$dd)
+      sample_ids <- dds$id
+      colnames(samplePoisDistMatrix) <- sample_ids
+      rownames(samplePoisDistMatrix) <- sample_ids
+      colors <- grDevices::colorRampPalette(c("white", "#4793AF", "#013649"))(255)
+
+      output$missatge4 <- renderText({"GENERATING POISSON DISTANCES PLOT"})
 
 
-      #
-      # output$poison <- renderPlot({print(b)})
-      #
-      # output$download_poison <- downloadHandler(
-      #   filename = function() { "DEA_poisson_distance.pdf" },
-      #   content = function(file) {
-      #     pdf(file, width = 10, height = 8)
-      #     print(b)
-      #     dev.off()
-      #   }
-      # )
 
-cat("5")
+      output$poison <- renderPlot({print(b)})
+
+      output$download_poison <- downloadHandler(
+        filename = function() { "DEA_poisson_distance.pdf" },
+        content = function(file) {
+          pdf(file, width = 10, height = 8)
+          print(b)
+          dev.off()
+        }
+      )
+
 #### proba de posar en comptes de stats:: sese stats::
       sampleDists <- dist(t(SummarizedExperiment::assay(vsd)))
       sampleDistMatrix <- as.matrix(sampleDists)
       rownames(sampleDistMatrix) <- paste(vsd$id, sep = " - ")
       colnames(sampleDistMatrix) <- rownames(sampleDistMatrix)
-      cat("6")
       # colors <- grDevices::colorRampPalette(c("white", "#4793AF"))(255)
       output$missatge5 <- renderText({"GENERATING VSD DISTANCE HEATMAP"})
 
@@ -1001,7 +1004,6 @@ cat("5")
         fontsize = 8,
         main = "Sample Distance Heatmap",
         display_numbers = FALSE)
-      cat("6.1")
 
       output$distance_heatmap <- renderPlot({print(c)})
 
@@ -1014,7 +1016,6 @@ cat("5")
         }
       )
 
-cat("7")
     output$missatge6 <- renderText({"GENERATING VSD BOXPLOT"})
 
       d<- graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
@@ -1029,7 +1030,6 @@ cat("7")
         gen_a2m$status <- col_data[[design_formula]]
         gen_a2m_ordered <- gen_a2m[order(gen_a2m$status), ]
 
-        cat("8")
         # Define colors based on status
         levels_design_formula <- unique(col_data[[design_formula]])
 
@@ -1049,7 +1049,6 @@ cat("7")
         axis(1, at = 1:nrow(gen_a2m_ordered), labels = rownames(gen_a2m_ordered), las = 2, cex.axis = 0.6)
         legend("topright", legend = levels_design_formula, fill = colors)
       }
-      cat("9")
     ## Renderizar el gráfico de boxplot
     output$vsd_boxplot <- renderPlot({
       graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
@@ -1117,7 +1116,6 @@ cat("7")
         dev.off()
       }
     )
-    cat("10")
 
     # Función para descargar el boxplot
     output$download_vsd_boxplot <- downloadHandler(
@@ -1128,12 +1126,10 @@ cat("7")
         dev.off()
       }
     )
-    cat("11")
        output$missatge7 <- renderText({"GENERATING PCA PLOT"})
 
       normalized_counts <- DESeq2::counts(dds, normalized = TRUE)
       pca_result <- prcomp(t(normalized_counts), scale. = TRUE)
-cat("12")
       pca_data <- as.data.frame(pca_result$x)
       pca_data$Sample <- SummarizedExperiment::colData(dds)$id
       pca_data$Condition_Group <- SummarizedExperiment::colData(dds)[[design_formula]]
@@ -1158,7 +1154,6 @@ cat("12")
           legend.title = ggplot2::element_text(size = 25),        # Título de la leyenda
           legend.text = ggplot2::element_text(size = 20)          # Texto de los elementos de la leyenda
         )
-cat("13")
 
     output$pca_plot <- renderPlot({print(pca_plot)})
     output$download_pca_plot <- downloadHandler(
@@ -1169,16 +1164,13 @@ cat("13")
         dev.off()
       }
     )
-    cat("14")
       output$missatge8 <- renderText({"GENERATING VOLCANO PLOT"})
       volcan<- EnhancedVolcano::EnhancedVolcano(res,
                                               lab = rownames(res),
                                               x = 'log2FoldChange',
                                               y = 'padj',
                                               pCutoff = 5e-2)
-      cat("14.1")
       output$volvano <- renderPlot({volcan})
-      cat("14.2")
       output$downloadvolvano <- downloadHandler(
         filename = function() {
           paste("DEA_volcano.pdf")
@@ -1201,7 +1193,6 @@ cat("13")
           dev.off()
         })
 
-      cat("15")
 
       output$missatge9 <- renderText({"GENERATING MA PLOT"})
       output$maPlot <- renderPlot({DESeq2::plotMA(res, main = "MA Plot of Results")})
@@ -1233,7 +1224,6 @@ cat("13")
       })
 
 
-    cat("16")
     ############################# FI DE DEA
      } else {cat("Skipping Diferential expresion analysis")}
 
@@ -1245,9 +1235,11 @@ cat("13")
         cat("Warning: The variable 'res' exists but is not of class 'DESeqResults'. GSEA analysis cannot proceed.")
       }
       else {
-      output$missatge11 <- renderText({"STARTING GSEA... It will take time"})
+        cat("\033[33mSTARTING GSEA")
 
         # gseGO  Analysis
+        cat("Performing gseGO Analysis")
+        cat("Preparing gene list for GSEA")
         original_gene_list <- res$log2FoldChange
         names(original_gene_list) <- rownames(res)
         gene_list <- na.omit(original_gene_list)
@@ -1257,6 +1249,7 @@ cat("13")
                                        OrgDb = org.Hs.eg.db::org.Hs.eg.db, pAdjustMethod = "bonferroni")
 
         # Dotplot for gseGO
+        cat("Creating Dotplot for gseGO ")
         dotplot1 <- clusterProfiler::dotplot(gse2, showCategory = 10, split = ".sign", font.size = 9, label_format = 40,
                                              title = "gseGO Enrichment Results: Pathways", color = "p.adjust", size = "Count")
 
@@ -1264,8 +1257,18 @@ cat("13")
                                              title = "gseGO Enrichment Results: Pathways", color = "p.adjust", size = "Count") + ggplot2::facet_grid(.~.sign)
 
         # Emaplot for gseGO
+        cat("Creating Emaplot for gseGO ")
         x2 <- enrichplot::pairwise_termsim(gse2)
-        emapplot1 <- enrichplot::emapplot(x2, max.overlaps = 70, min.segment.length = 0.3, point_size = 0.3, font.size = 5) +   ggplot2::ggtitle("Enrichment Map gseGO ")
+        #emapplot1 <- enrichplot::emapplot(x2, max.overlaps = 70, min.segment.length = 0.3, point_size = 0.3, font.size = 5) +   ggplot2::ggtitle("Enrichment Map gseGO ")
+        emapplot1 <- enrichplot::emapplot(x2) + ggplot2::ggtitle("Enrichment Map gseGO ")
+
+
+        # Ridgeplot for gseGO
+        cat("Creating Ridgeplot for gseGO ")
+        ridgeplot1 <- enrichplot::ridgeplot(gse2)  +  ggplot2::labs(x = "gseGO enrichment distribution", font.size = 7) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
+
+
+
 
         # Ridgeplot for gseGO
         ridgeplot1 <- enrichplot::ridgeplot(gse2)  +  ggplot2::labs(x = "gseGO enrichment distribution", font.size = 7) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
@@ -1370,14 +1373,17 @@ cat("13")
         dotplot3 <- clusterProfiler::dotplot(kk2, showCategory = 10, title = "Enriched Pathways for KEGG", split = ".sign", font.size = 9) + ggplot2::facet_grid(.~.sign)
 
         # Emaplot for KEGG
+        cat("a")
         x3 <- enrichplot::pairwise_termsim(kk2)
-        emapplot2 <- enrichplot::emapplot(x3, font.size = 8 +  ggplot2::ggtitle("KEGG Enrichment Map"))
+        emapplot2 <- enrichplot::emapplot(x3) + ggplot2::ggtitle("KEGG Enrichment Map")
 
         # Ridgeplot for KEGG
         ridgeplot2 <- enrichplot::ridgeplot(kk2) +  ggplot2::labs(x = "KEGG enrichment distribution", font.size = 6) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
+        cat("b")
 
         # Heatplot for KEGG
         heatplot2 <- enrichplot::heatplot(kk2, showCategory = 10) + ggplot2::ggtitle("KEGG Heatplot")
+        cat("c")
 
         # Treeplot for KEGG
         cat("Creating Treeplot for KEGG ")
@@ -1407,52 +1413,52 @@ cat("13")
         }
       )
       output$download_ridgeplot2 <- downloadHandler(
-        filename = function() { paste("KEGG_ridgeplot.pdf") },
-        content = function(file) {
-          pdf(file)
-          print(ridgeplot2)
-          dev.off()
-        }
-      )
-      output$download_heatplot2 <- downloadHandler(
-        filename = function() { paste("KEGG_heatplot.pdf") },
-        content = function(file) {
-          pdf(file)
-          print(heatplot2)
-          dev.off()
-        }
-      )
-      output$download_treeplot2 <- downloadHandler(
-        filename = function() { paste("KEGG_treeplot1.pdf") },
-        content = function(file) {
-          pdf(file)
-          print(treeplot2)
-          dev.off()
-        }
-      )
+    filename = function() { paste("KEGG_ridgeplot.pdf") },
+    content = function(file) {
+    pdf(file)
+    print(ridgeplot2)
+    dev.off()
+  }
+)
+output$download_heatplot2 <- downloadHandler(
+  filename = function() { paste("KEGG_heatplot.pdf") },
+  content = function(file) {
+    pdf(file)
+    print(heatplot2)
+    dev.off()
+  }
+)
+output$download_treeplot2 <- downloadHandler(
+  filename = function() { paste("KEGG_treeplot1.pdf") },
+  content = function(file) {
+    pdf(file)
+    print(treeplot2)
+    dev.off()
+  }
+)
 
 
-        # enrichGO Analysis
-        cat("Performing GO Enrichment Analysis")
-        sig_genes_df <- subset(res, padj < 0.05)
+  # enrichGO Analysis
+  cat("Performing GO Enrichment Analysis")
+  sig_genes_df <- subset(res, padj < 0.05)
 
-        if (nrow(sig_genes_df) > 0) {
-          # Prepare the gene list for enrichment analysis
-          genes <- sig_genes_df$log2FoldChange
-          names(genes) <- rownames(sig_genes_df)
+  if (nrow(sig_genes_df) > 0) {
+    # Prepare the gene list for enrichment analysis
+    genes <- sig_genes_df$log2FoldChange
+    names(genes) <- rownames(sig_genes_df)
 
-          # Perform GO enrichment analysis
-          cat("Performing GO Enrichment Analysis")
-          go_enrich <- clusterProfiler::enrichGO(
-            gene = names(genes),
-            universe = names(gene_list),
-            OrgDb =  org.Hs.eg.db::org.Hs.eg.db,
-            keyType = 'SYMBOL',
-            readable = TRUE,
-            ont = "BP",
-            pvalueCutoff = 0.05,
-            qvalueCutoff = 0.10
-          )
+    # Perform GO enrichment analysis
+    cat("Performing GO Enrichment Analysis")
+    go_enrich <- clusterProfiler::enrichGO(
+      gene = names(genes),
+      universe = names(gene_list),
+      OrgDb =  org.Hs.eg.db::org.Hs.eg.db,
+      keyType = 'SYMBOL',
+      readable = TRUE,
+      ont = "BP",
+      pvalueCutoff = 0.05,
+      qvalueCutoff = 0.10
+    )
 
           # Create a bar plot for significant GO terms
           cat("Creating Bar Plot for GO Enrichment")
@@ -1522,7 +1528,9 @@ cat("13")
             }
           )
 
-        }}}
+        }
+    }
+    }
     ############################
     #####
     ####
@@ -1550,17 +1558,8 @@ cat("13")
       # print(paste0("Inicial gene number: ", dim(counts_data)[1]))
       # ## Normalización TPM
       # cat("TPM normalization performed and stored on tpm_counts.csv")
-      # suppressWarnings({
-      #   tpm_counts <- IOBR::count2tpm(counts_data,
-      #                                 idType = "Symbol",
-      #                                 org = "hsa",
-      #                                 source = "biomart")
-      #   write.csv(tpm_counts, "tpm_counts.csv")
-      # })
-      # Realizar la normalización TPM
 
-      # Llamada a la función para normalizar TPM (puedes sustituir por el código que tengas)
-      tpm_counts <- IOBR::count2tpm(counts_data,
+       tpm_counts <- IOBR::count2tpm(counts_data,
                                idType = "Symbol",
                                org = "hsa",
                                source = "biomart")
@@ -2449,7 +2448,7 @@ cat("13")
         AnnotData <- col_data
       }
 
-      cat("Normalizing data...")
+      output$normalizing <- renderText({"Normalizing data..."})
       colnames(AnnotData) <- gsub(" ", "_", colnames(AnnotData))
       col_data <- AnnotData[order(AnnotData$id), ]
       col_data<- as.data.frame(col_data)
@@ -2473,12 +2472,12 @@ cat("13")
       df_t <- t(normalized_counts)
 
       # Checking for duplicate columns
-      cat("Checking for duplicate columns")
+      output$checkduplicates <- renderText({"Checking for duplicate columns"})
       duplicated_columns <- colnames(df_t)[duplicated(colnames(df_t))]
       if (length(duplicated_columns) > 0) {
-        print(paste("Duplicate columns found:", paste(duplicated_columns, collapse = ", ")))
-      } else {
-        print("No duplicate columns.")
+        output$duplicatesfound <- renderText({paste("Duplicate columns found:", paste(duplicated_columns, collapse = ", "))})
+        } else {
+         output$noduplicates <- renderText({"No duplicate columns."})
       }
 
       rownames(col_data) <- col_data$id
@@ -2487,7 +2486,6 @@ cat("13")
       # Filter data
       cat("Filtering data.")
       subset_data <- dplyr::filter(col_data, id %in% ids_data)
-      cat("borrar c")
       df_ta <- as.data.frame(df_t)
       df_ta$id <- rownames(df_ta)
 
@@ -2497,6 +2495,7 @@ cat("13")
         top_genes <- genes_to_use
       } else if (exists("res")) {
         cat("Selecting TOP 10 genes with the lowest padj")
+        output$top10 <- renderText({"Selecting TOP 10 genes with the lowest padj"})
         top_genes <- rownames(head(res[order(res$padj), ], 10))
         top_genes <- rownames(head(res[order(res$padj), ], 10))
       } else {
@@ -2510,8 +2509,9 @@ cat("13")
       merged_data[[time]] <- as.numeric(merged_data[[time]])
 
       cat("Starting survival analysis.")
+      output$startingsurvival <- renderText({"Starting survival analysis."})
 
-      #pdf("survival_analysis_plots_HTG_analyzer.pdf")
+      pdf("survival_analysis_plots_HTG_analyzer.pdf")
       top_genes_clean <- clean_column_names(top_genes)
 
       # Perform survival analysis for each gene
@@ -2519,8 +2519,6 @@ cat("13")
         if (!is.numeric(merged_data[[i]])) {
           next
         }
-        cat("d")
-        cat("\n")
         cat("Performing analysis for column:\033[0m ", i, "\n")
         # Perform MAXSTAT test
         merged_data$time <- merged_data[[time]]
@@ -2529,10 +2527,9 @@ cat("13")
         MAXSTAT <- maxstat::maxstat.test(survival::Surv(time, variable_01) ~ gene_column, data = merged_data,
                                          smethod = "LogRank", pmethod = "Lau92", iscores = TRUE, minprop = 0.45, maxprop = 0.55)
         cut.off <- MAXSTAT$estimate
-        cat("CUT OFF")
-        output$cut_off <- renderText({"CUT OFF"})
-        print(cut.off)
-        output$printcut_off <- renderPrint({print(cut.off)})
+        output$cutoffmessage <- renderText({
+          paste("CUT OFF using MAXSTAT:", cut.off)
+        })
 
         # Create a new variable based on the cutoff
         new_column_name <- paste0(i, "_mRNA_expression")
@@ -2548,6 +2545,7 @@ cat("13")
 
         # Summary of the fit
         cat("Summary of the fit")
+        output$summaryfit <- renderText({"Summary of the fit"})
         print(summary(fit1))
         fit1_df <- data.frame(
           time = fit1$time,
@@ -2569,19 +2567,27 @@ cat("13")
         )
         fit1_df <- merge(fit1_df, merged_data_subset, by = c("time", "n_event"), all.x = TRUE)
         csv_filename <- paste0("Summary_of_the_fit_", new_column_name, ".csv")
-        #write.csv(fit1_df, file = csv_filename, row.names = FALSE)
+        # write.csv(fit1_df, file = csv_filename, row.names = FALSE)
+        output$fit1_df <- renderTable({head(fit1_df)})
+        output$download_fit1_df <- downloadHandler(
+          filename = function() {
+            paste0("Summary_of_the_fit_", Sys.Date(), ".csv")
+          },
+          content = function(file) {
+            write.csv(fit1_df, file, row.names = FALSE)
+          }
+        )
 
 
         # Log-rank test and p-value
-        cat("Performing log-rank test and obtaining p-value")
+        output$logrank <- renderText({"Performing log-rank test and obtaining p-value"})
         surv_diff <- survival::survdiff(surv_formula, data = merged_data)
         p_value <- 1 - stats::pchisq(surv_diff$chisq, length(surv_diff$n) - 1)
 
         print(surv_diff)
-
-        output$p_value <- renderText({"Performing log-rank test and obtaining p-value"})
-        output$printsurv_diff <- renderPrint({print(surv_diff)})
-
+        output$surv_diff_output <- renderPrint({
+          print(surv_diff)
+        })
         surv_diff_df <- data.frame(
           group = attr(surv_diff$n, "dimnames")[[1]],
           N = as.vector(surv_diff$n),
@@ -2592,60 +2598,28 @@ cat("13")
           p_value = rep(surv_diff$pvalue, 2)    # p-valor repetido dos veces
         )
         csv_filename <- paste0("surv_diff_summary_", new_column_name, ".csv")
-        output$download_surv_diff <- downloadHandler(
-          filename = function() {
-            paste0("surv_diff_summary_", new_column_name, ".csv")
-          },
-          content = function(file) {
-            write.csv(surv_diff_df, file = file, row.names = FALSE)
-          }
-        )
-
-        #write.csv(surv_diff_df, file = csv_filename, row.names = FALSE)
+        write.csv(surv_diff_df, file = csv_filename, row.names = FALSE)
         cat("P-value")
         print(p_value)
 
         # Generate Kaplan-Meier plot
         cat("Generating Kaplan-Meier plot")
-        output$kaplanmeier <- renderText({"Generating Kaplan-Meier plot"})
         palette <- c("#9A3449", "#D4A8B1")
-        # plot(fit1, lty = 1, col = palette, lwd = 4, main = paste("Survival analysis for", i, "\n", "p-value =", format(p_value, digits = 3)))
-        # legend("topright",
-        #        legend = c("High", "Low"),
-        #        lty = 1,
-        #        col = palette,
-        #        lwd = 4)
-        palette <- c("#9A3449", "#D4A8B1")
-        output$km_plot <- renderPlot({
-          plot(fit1, lty = 1, col = palette, lwd = 4, main = paste("Survival analysis for", i, "\n", "p-value =", format(p_value, digits = 3)))
-          legend("topright",
-                 legend = c("High", "Low"),
-                 lty = 1,
-                 col = palette,
-                 lwd = 4)
+        plot(fit1, lty = 1, col = palette, lwd = 4, main = paste("Survival analysis for", i, "\n", "p-value =", format(p_value, digits = 3)))
+
+        # Add a legend
+        legend("topright",
+               legend = c("High", "Low"),
+               lty = 1,
+               col = palette,
+               lwd = 4)
+        cat("Plots and .csv saved in ", paste(getwd(), "survival_analysis_plots_top10.pdf", sep = "/"))
+        output$survival <- renderText({
+          paste("Plots and .csv saved in ", paste(getwd(), "survival_analysis_plots_top10.pdf", sep = "/"))
         })
 
-        output$download_km_plot <- downloadHandler(
-          filename = function() {
-            paste0("survival_analysis_plot_", i, ".pdf")
-          },
-          content = function(file) {
-            pdf(file)
-            plot(fit1, lty = 1, col = palette, lwd = 4, main = paste("Survival analysis for", i, "\n", "p-value =", format(p_value, digits = 3)))
-            legend("topright",
-                   legend = c("High", "Low"),
-                   lty = 1,
-                   col = palette,
-                   lwd = 4)
-            dev.off()
-          }
-        )
-        cat("Plots saved in survival_analysis_plots_top10.pdf")
-
-
       }
-      #dev.off()
-
+      dev.off()
 
     } else {
       cat("Skipping survival analysis.")
