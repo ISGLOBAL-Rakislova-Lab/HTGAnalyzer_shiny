@@ -155,32 +155,34 @@ ui <- fluidPage(
       tableOutput("ratiosb"),
       downloadButton("download_summary", "Download Summary Stats"),
       downloadButton("download_ratiosb", "Download QC Results"),
-      plotOutput("pos_genes_plot"),
+      plotOutput("pos_genes_plot", width = "100%", height = "400px"),
       downloadButton("download_pos_genes_plot", "Download Positive Control Plot (PDF)"),
-      plotOutput("size_lib"),
+      plotOutput("size_lib", width = "100%", height = "400px"),
       downloadButton("download_size_lib_plot", "Download Library Size Plot (PDF)"),
-      plotOutput("neg"),
+      plotOutput("neg", width = "100%", height = "400px"),
       downloadButton("download_neg_plot", "Download Negative Control Plot (PDF)"),
-      plotOutput("gdna"),
+      plotOutput("gdna", width = "100%", height = "400px"),
       downloadButton("download_gdna_plot", "Download Genomic DNA Plot (PDF)"),
-      plotOutput("ERCC"),
+      plotOutput("ERCC", width = "100%", height = "400px"),
       downloadButton("download_ercc_plot", "Download ERCC Plot (PDF)"),
-      plotOutput("med"),
+      plotOutput("med", width = "100%", height = "400px"),
       downloadButton("download_med_plot", "Download Median Plot (PDF)"),
-      plotOutput("qc_plot_heatmap"),
-      downloadButton("download_qc_plot_heatmap", "Download QC Heatmap PDF")
+      plotOutput("qc_plot_heatmap", width = "100%", height = "400px"),
+      downloadButton("download_qc_plot_heatmap", "Download QC Heatmap PDF"),
+      textOutput("outliers")
       ),
       # RESULTS DEA
-      tabPanel("Differential Expresion Analisis",
-      verbatimTextOutput("error_design_formula"),
+      tabPanel("Differential Expression Analisis",
+      textOutput("error_design_formula"),
       textOutput("filtering_data"),
       textOutput("removing_outliers"),
       textOutput("missatge2"),
+      textOutput("dds_missatge"),
       verbatimTextOutput("dds_output"),
-      verbatimTextOutput("vsd_output"),
       textOutput("results_VST"),
+      verbatimTextOutput("vsd_output"),
       textOutput("missatge3"),
-      plotOutput("DEA_heatmap"),
+      plotOutput("DEA_heatmap", width = "100%", height = "400px"),
       downloadButton("DEA_heatmap_download", "Download HEATMAP (PDF)"),
       textOutput("missatge_contrast"),
       textOutput("summary_results"),
@@ -188,39 +190,41 @@ ui <- fluidPage(
       textOutput("top10_contrast"),
       verbatimTextOutput("printtop10_contrast"),
       downloadButton("download_res", "Download DEA results"),
-      plotOutput("size_factors_plot"),
+      textOutput("missatge_size_factors_plot"),
+      plotOutput("size_factors_plot", width = "100%", height = "400px"),
       downloadButton("download_DEA_plot", "Download Size Factors Plot"),
-      plotOutput("correlation_heatmap"),
-      plotOutput("poisson_heatmap"),
+      plotOutput("correlation_heatmap", width = "100%", height = "400px"),
+      textOutput("correlation_heatmap_mes"),
+      downloadButton("download_correlation_heatmap", "Download correlation heatmap"),
+      plotOutput("poisson_heatmap", width = "100%", height = "400px"),
       textOutput("missatge4"),
-      plotOutput("poison"),
+      plotOutput("poison", width = "100%", height = "400px"),
       downloadButton("download_poison", "Download poisson distance"),
       textOutput("missatge5"),
-      plotOutput("distance_heatmap"),
+      plotOutput("distance_heatmap", width = "100%", height = "400px"),
       downloadButton("download_distance_heatmap", "DEA Sample Distance Heatmap"),
       textOutput("missatge6"),
-      plotOutput("vsd_boxplot"),
+      plotOutput("vsd_boxplot", width = "100%", height = "400px"),
       downloadButton("download_vsd_boxplot", "Download Boxplot VSD"),
-      plotOutput("top_genes_plot"),
-      downloadButton("download_top_genes_plot", "Download top genes plots"),
+      textOutput("topgenes"),
       textOutput("missatge7"),
-      plotOutput("pca_plot"),
+      plotOutput("pca_plot", width = "100%", height = "400px"),
       downloadButton("download_pca_plot", "Download PCA plot"),
       textOutput("missatge8"),
       textOutput("missatge9"),
-      plotOutput("maPlot"),
+      plotOutput("maPlot", width = "100%", height = "400px"),
       downloadButton("downloadMAPlot", "Download MA plot"),
-      plotOutput("volvano"),
+      plotOutput("volvano", width = "100%", height = "400px"),
       downloadButton("downloadvolvano", "Download Volcano plot"),
       textOutput("missatge10"),
-      plotOutput("dispersion"),
+      plotOutput("dispersion", width = "100%", height = "400px"),
       downloadButton("downloaddispersion", "Download Dispersion plot")
       ),
       # RESULTS GSEA
-      tabPanel("Tumor Microenvironment",
-      plotOutput("dotplot1"),
+      tabPanel("GSEA",
+      plotOutput("dotplot1", width = "100%", height = "400px"),
       downloadButton("download_dotplot1", "Download Dotplot GSEA 1"),
-      plotOutput("dotplot2"),
+      plotOutput("dotplot2", width = "100%", height = "400px"),
       downloadButton("download_dotplot2", "Download Dotplot GSEA 2"),
       plotOutput("emapplot1"),
       downloadButton("download_emapplot", "Download Emapplot GSEA"),
@@ -251,6 +255,7 @@ ui <- fluidPage(
       ),
       # RESULTS TPM
       tabPanel("Tumor Microenvironment",
+               textOutput("genes_omitted"),
       textOutput("initial_message"),
       textOutput("normalization_message"),
       tableOutput("tpm_table"),
@@ -262,14 +267,19 @@ ui <- fluidPage(
       downloadButton("download_qti", "Download imm_qti.csv"),
       tableOutput("imm_xcell_table"),
       downloadButton("download_xcell", "Download imm_xcell.csv"),
-      downloadButton("download_plot_imm_qti", "Download imm_qti plot"),
-      downloadButton("download_plot_imm_xcell", "Download imm_xcell plot"),
+      verbatimTextOutput("TME"),
       plotOutput("plot_cell_fraction_EPIC"),
       downloadButton("download_plot_EPIC", "Descarregar EPIC"),
       plotOutput("plot_cell_fraction_quanTIseq"),
       downloadButton("download_plot_quanTIseq", "Descarregar quanTIseq"),
       plotOutput("plot_cell_fraction_xCell"),
       downloadButton("download_plot_xCell", "Descarregar xCell"),
+      verbatimTextOutput("resultados_norm_imm_qtiA"),
+      verbatimTextOutput("parametric_results_imm_qtiA"),
+      verbatimTextOutput("resultados_norm_epicA"),
+      verbatimTextOutput("parametric_results_epicA"),
+      verbatimTextOutput("resultados_norm_xcellA"),
+      verbatimTextOutput("parametric_results_xcellA"),
       plotOutput("heatmap_qti"),
       downloadButton("download_heatmap_qti", "Download Heatmap qti"),
       plotOutput("heatmap_EPIC"),
@@ -285,6 +295,8 @@ ui <- fluidPage(
                textOutput("duplicatesfound"),
                textOutput("noduplicates"),
                textOutput("top10"),
+               verbatimTextOutput("genes_used"),
+               verbatimTextOutput("genes_used2"),
                textOutput("startingsurvival"),
                textOutput("cutoffmessage"),
                textOutput("summaryfit"),
@@ -424,14 +436,10 @@ server <- function(input, output, session) {
     col_data <- col_data[common_ids, , drop = FALSE]
 
     dims_message <- paste("Dimensions of filtered counts file:", paste(dim(counts_data), collapse = " x "))
-    output$dimension_output <- renderText({
-      dims_message
-    })
+    output$dimension_output <- renderText({dims_message})
 
     dims_message1 <- paste("Dimensions of filtered annotation files:", paste(dim(col_data), collapse = " x "))
-    output$dimension_output1 <- renderText({
-      dims_message1
-    })
+    output$dimension_output1 <- renderText({dims_message1})
 
     if (ncol(counts_data) == nrow(col_data)) {
       cat("The filtered data sets are now aligned.")
@@ -563,9 +571,7 @@ server <- function(input, output, session) {
         "PASS"
       )
 
-      output$ratiosb <- renderTable({
-        ratiosb
-      })
+      output$ratiosb <- renderTable({ratiosb})
 
       output$download_ratiosb <- downloadHandler(
         filename = function() { "QC_results_QC.csv" },
@@ -741,7 +747,7 @@ server <- function(input, output, session) {
         content = function(file) {
           pdf(file)
           plot(ratios$`gdna/genes`, xlab = "", ylab = "gdna/genes", col = colores_gdna,
-               xaxt = "n", pch = 19, main = "Genomic DNA (QC3)", ylim = c(0, max_value))
+               xaxt = "n", pch = 19, main = "Genomic DNA (QC3)", ylim = c(0, max_value_gdna))
           axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
           abline(h = threshold_line_gdna, col = "red")
           dev.off()
@@ -799,6 +805,10 @@ server <- function(input, output, session) {
 
       rows_with_1 <- suppressWarnings(rownames(bin_matrix)[apply(bin_matrix, 1, any)])
       outliers<- rows_with_1
+      output$outliers <- renderText({
+        paste("Los outliers son los siguientes:", paste(outliers, collapse = "/"))
+      })
+
       #############################fi de QC
 
     } else {
@@ -825,15 +835,20 @@ server <- function(input, output, session) {
     # Removing outliers if specified
     if (remove_outliers && !is.null(outliers) && length(outliers) > 0) {
       output$removing_outliers <- renderText({"REMOVING OUTLIERS..."})
+      cat("REMOVING OUTLIERS...\n")
       counts_filtered <- counts_data[, !colnames(counts_data) %in% outliers]
       AnnotData <- col_data[!col_data[["id"]] %in% outliers, ]
     } else {
       counts_filtered <- counts_data
       AnnotData <- col_data
     }
-
+    ############################
+    #####
+    ####
+    ####
     if (DEA) {
        output$missatge2 <- renderText({"STARTING THE DIFERENTIAN EXPRESSION ANALYSIS."})
+       cat("STARTING THE DIFERENTIAN EXPRESSION ANALYSIS.\n")
 
 
        design_formul <- as.formula(paste("~", " ", design_formula))
@@ -860,13 +875,13 @@ server <- function(input, output, session) {
        keep_genes <- keep_genes & (rowSums(DESeq2::counts(dds) >= threshold_gene) >= smallest_group_size)
        # Apply gene filters to the DESeq2 object
        dds <- dds[keep_genes, ]
+       output$dds_missatge <- renderText({"Preprocessed Data for Differential Analysis"})
        output$dds_output <- renderPrint({dds})
 
-    #### LAIA FINS AQUI BE
        # Perform DESeq2 analysis
        vsd <- DESeq2::vst(dds, blind = FALSE)
-       #output$results_VST <- renderText({"RESULTS OF VST NORMALIZATION"})
-       # output$vsd_output <- renderPrint({vsd})
+       output$results_VST <- renderText({"RESULTS OF VST NORMALIZATION"})
+        output$vsd_output <- renderPrint({vsd})
        dds <- DESeq2::DESeq(dds)
 
        # Generate heatmap if generate_heatmap is TRUE
@@ -920,9 +935,8 @@ server <- function(input, output, session) {
 
       dds <- DESeq2::estimateSizeFactors(dds)
 
-      #### LAIA FINS AQUI BE 2 OJO pheatmap no apareix.
 
-
+      output$missatge_size_factors_plot <- renderText({"SIZE FACTORS PLOT"})
       output$size_factors_plot <- renderPlot({plot(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)),
            xlab = "Size Factors", ylab = "Column Sums of Counts",
            main = "Size Factors vs. Column Sums")
@@ -941,19 +955,17 @@ server <- function(input, output, session) {
         dev.off()
       }
     )
-    #### laia fins aqui be 3
       vsd_cor <- cor(SummarizedExperiment::assay(vsd))
       sample_ids <- vsd$id
       annotation_col <- data.frame(SampleID = sample_ids)
       rownames(annotation_col) <- colnames(vsd_cor)
-      #### LAIA fins aqui va.
-
 
       aa<- pheatmap::pheatmap(vsd_cor,
                              main = "Sample-to-Sample Correlation Heatmap",
                              display_numbers = FALSE,
                              annotation_col = annotation_col,
                              annotation_legend = FALSE)
+      output$correlation_heatmap_mes <- renderText({"CORRELATION HEATMAP"})
       output$correlation_heatmap <- renderPlot({print(aa)})
 
       output$download_correlation_heatmap <- downloadHandler(
@@ -965,7 +977,6 @@ server <- function(input, output, session) {
         }
       )
 
-##### LAIA problemes amb poiclaclu
       # Calcular la distancia de Poisson
       pois_distance <- PoiClaClu::PoissonDistance(t(DESeq2::counts(dds, normalized = TRUE)))
       samplePoisDistMatrix <- as.matrix(pois_distance$dd)
@@ -975,8 +986,6 @@ server <- function(input, output, session) {
       colors <- grDevices::colorRampPalette(c("white", "#4793AF", "#013649"))(255)
 
       output$missatge4 <- renderText({"GENERATING POISSON DISTANCES PLOT"})
-
-
 
       output$poison <- renderPlot({print(b)})
 
@@ -1020,10 +1029,19 @@ server <- function(input, output, session) {
     output$missatge6 <- renderText({"GENERATING VSD BOXPLOT"})
 
       d<- graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
-
+      ## Renderizar el gráfico de boxplot
+      output$vsd_boxplot <- renderPlot({
+        graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
+      })
 
       res_sorted <- res[order(res$padj), ]
       top_genes_indices <- head(row.names(res_sorted), 10)
+
+      output$topgenes <- renderText({
+        paste("Plots for individual plot will be store in", paste(getwd(), "DEA_ gene_expression_plots.pdf", sep = "/"))
+      })
+
+      pdf("DEA_ gene_expression_plots.pdf")
 
       for (gene_index in top_genes_indices) {
         gen_a2m <- as.data.frame(SummarizedExperiment::assay(vsd)[gene_index, ])
@@ -1031,6 +1049,7 @@ server <- function(input, output, session) {
         gen_a2m$status <- col_data[[design_formula]]
         gen_a2m_ordered <- gen_a2m[order(gen_a2m$status), ]
 
+
         # Define colors based on status
         levels_design_formula <- unique(col_data[[design_formula]])
 
@@ -1050,73 +1069,10 @@ server <- function(input, output, session) {
         axis(1, at = 1:nrow(gen_a2m_ordered), labels = rownames(gen_a2m_ordered), las = 2, cex.axis = 0.6)
         legend("topright", legend = levels_design_formula, fill = colors)
       }
-    ## Renderizar el gráfico de boxplot
-    output$vsd_boxplot <- renderPlot({
-      graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
-    })
+      dev.off()
 
-    # Renderizar los gráficos de genes top y ordenados
-    output$top_genes_plot <- renderPlot({
-      res_sorted <- res[order(res$padj), ]
-      top_genes_indices <- head(row.names(res_sorted), 10)
 
-      for (gene_index in top_genes_indices) {
-        gen_a2m <- as.data.frame(SummarizedExperiment::assay(vsd)[gene_index, ])
-        gen_a2m$status <- col_data[[design_formula]]
-        gen_a2m_ordered <- gen_a2m[order(gen_a2m$status), ]
 
-        # Define colors based on status
-        levels_design_formula <- unique(col_data[[design_formula]])
-        num_colors <- length(levels_design_formula)
-        palette <- colorRampPalette(c("red", "orange", "yellow", "green", "purple", "#4793AF"))(num_colors)
-        colors <- palette
-        group_colors <- colors[as.numeric(factor(col_data[[design_formula]], levels = levels_design_formula))]
-
-        # Graficar
-        plot(gen_a2m_ordered$`SummarizedExperiment::assay(vsd)[gene_index, ]`,
-             xlab = "",
-             ylab = gene_index,
-             col = group_colors,
-             xaxt = "n",
-             pch = 19)
-        axis(1, at = 1:nrow(gen_a2m_ordered), labels = rownames(gen_a2m_ordered), las = 2, cex.axis = 0.6)
-        legend("topright", legend = levels_design_formula, fill = colors)
-      }
-    })
-
-    # Función para descargar el gráfico de genes top
-    output$download_top_genes_plot <- downloadHandler(
-      filename = function() { "Top_Genes_Plot.pdf" },
-      content = function(file) {
-        pdf(file, width = 10, height = 8)
-        res_sorted <- res[order(res$padj), ]
-        top_genes_indices <- head(row.names(res_sorted), 10)
-
-        for (gene_index in top_genes_indices) {
-          gen_a2m <- as.data.frame(SummarizedExperiment::assay(vsd)[gene_index, ])
-          gen_a2m$status <- col_data[[design_formula]]
-          gen_a2m_ordered <- gen_a2m[order(gen_a2m$status), ]
-
-          # Define colors based on status
-          levels_design_formula <- unique(col_data[[design_formula]])
-          num_colors <- length(levels_design_formula)
-          palette <- colorRampPalette(c("red", "orange", "yellow", "green", "purple", "#4793AF"))(num_colors)
-          colors <- palette
-          group_colors <- colors[as.numeric(factor(col_data[[design_formula]], levels = levels_design_formula))]
-
-          # Graficar
-          plot(gen_a2m_ordered$`SummarizedExperiment::assay(vsd)[gene_index, ]`,
-               xlab = "",
-               ylab = gene_index,
-               col = group_colors,
-               xaxt = "n",
-               pch = 19)
-          axis(1, at = 1:nrow(gen_a2m_ordered), labels = rownames(gen_a2m_ordered), las = 2, cex.axis = 0.6)
-          legend("topright", legend = levels_design_formula, fill = colors)
-        }
-        dev.off()
-      }
-    )
 
     # Función para descargar el boxplot
     output$download_vsd_boxplot <- downloadHandler(
@@ -1225,9 +1181,11 @@ server <- function(input, output, session) {
       })
 
 
-    ############################# FI DE DEA
-     } else {cat("Skipping Diferential expresion analysis")}
-
+     } else {cat("Skipping Diferential expresion analysis\n")}
+    ############################
+    #####
+    ####
+    ####
     if (GSEA) {
       if (!exists("res")) {
         cat("Warning: The variable 'res' does not exist. GSEA analysis cannot proceed without it.")
@@ -1571,6 +1529,11 @@ output$download_treeplot2 <- downloadHandler(
       genes_omitidos <- base::setdiff(rownames(counts_data), rownames(tpm_counts))
       print(paste0("Number of genes omitted during TPM normalization due to their length not being available in Biomart:   ", dim(counts_data)[1]-dim(tpm_counts)[1]))
       tpm_counts <- as.data.frame(tpm_counts)
+      output$genes_omitted <- renderText({
+        paste0("Number of genes omitted during TPM normalization due to their length not being available in Biomart: ",
+               dim(counts_data)[1] - dim(tpm_counts)[1])
+      })
+
 
       # Mostrar el número inicial de genes
       output$initial_message <- renderText({
@@ -1598,7 +1561,7 @@ output$download_treeplot2 <- downloadHandler(
       )
 
       if (!is.null(DEA) && DEA) {
-        cat("We are going to use information from DEA")
+        cat("We are going to use information from DEA\n")
         dds <- DESeq2::estimateSizeFactors(dds)
         normalized_counts <- DESeq2::counts(dds, normalized = TRUE)
       } else {
@@ -1608,7 +1571,7 @@ output$download_treeplot2 <- downloadHandler(
         AnnotData <- AnnotData[order(AnnotData$id), ]
         counts_data <- counts_data[, order(colnames(counts_data))]
         if (!identical(colnames(counts_data), AnnotData$id)) {
-          stop("Column names of counts_data and IDs in AnnotData do not match.")
+          stop("Column names of counts_data and IDs in AnnotData do not match.\n")
         }
         dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts_data, colData = AnnotData, design = design_formul)
         dds <- DESeq2::estimateSizeFactors(dds)
@@ -1619,7 +1582,7 @@ output$download_treeplot2 <- downloadHandler(
       imm_epic <- immunedeconv::deconvolute(tpm_counts, method = "epic")
       imm_qti <- immunedeconv::deconvolute(tpm_counts, method = "quantiseq")
       imm_xcell <- immunedeconv::deconvolute(tpm_counts, method = "xcell")
-      cat("results of the TME will be stored in imm_epic.csv, imm_qti.csv and imm_xcell.csv ")
+      cat("results of the TME will be stored in imm_epic.csv, imm_qti.csv and imm_xcell.csv \n")
       # write.csv(imm_epic, file = "imm_epic.csv")
       # write.csv(imm_qti, file = "imm_qti.csv")
       # write.csv(imm_xcell, file = "imm_xcell.csv")
@@ -1628,35 +1591,29 @@ output$download_treeplot2 <- downloadHandler(
       })
 
       # Mostrar las primeras filas de los resultados como tabla
-      output$imm_epic_table <- renderTable({
-        head(imm_epic)
-      })
+      output$imm_epic_table <- renderTable({head(imm_epic)})
 
-      output$imm_qti_table <- renderTable({
-        head(imm_qti)
-      })
+      output$imm_qti_table <- renderTable({head(imm_qti)})
 
-      output$imm_xcell_table <- renderTable({
-        head(imm_xcell)
-      })
+      output$imm_xcell_table <- renderTable({head(imm_xcell)})
 
       # Permitir la descarga de los archivos CSV
       output$download_epic <- downloadHandler(
-        filename = function() { "imm_epic.csv" },
+        filename = function() { "TMEimm_epic.csv" },
         content = function(file) {
           write.csv(imm_epic, file)
         }
       )
 
       output$download_qti <- downloadHandler(
-        filename = function() { "imm_qti.csv" },
+        filename = function() { "TMEimm_qti.csv" },
         content = function(file) {
           write.csv(imm_qti, file)
         }
       )
 
       output$download_xcell <- downloadHandler(
-        filename = function() { "imm_xcell.csv" },
+        filename = function() { "TMEimm_xcell.csv" },
         content = function(file) {
           write.csv(imm_xcell, file)
         }
@@ -1680,7 +1637,7 @@ output$download_treeplot2 <- downloadHandler(
       imm_xcell <- std.im.df(imm_xcell)
 
       # Se incluye la variable AnnotData$design_formula en los dataframes
-      cat("Are they in the same order?")
+      cat("Are they in the same order?\n")
 
       rownames(AnnotData)<- AnnotData$id
       AnnotData <- AnnotData[order(rownames(AnnotData)), ]
@@ -1692,13 +1649,14 @@ output$download_treeplot2 <- downloadHandler(
       rownames(imm_qti)
       rownames(imm_xcell)
 
-      cat("Have to be true.")
-      cat("EPIC")
+      cat("Have to be true.\n")
+      cat("EPIC\n")
       print(all(rownames(AnnotData)==rownames(imm_epic)))
-      cat("qti")
+      cat("qti\n")
       print(all(rownames(AnnotData)==rownames(imm_qti)))
-      cat("xcell")
+      cat("xcell\n")
       print(all(rownames(AnnotData)==rownames(imm_xcell)))
+
 
       imm_epic[[design_formula]] <- factor(AnnotData[[design_formula]])
       imm_qti[[design_formula]] <- factor(AnnotData[[design_formula]])
@@ -1718,6 +1676,7 @@ output$download_treeplot2 <- downloadHandler(
       column_names <- names(imm_epic)[-ncol(imm_epic)]
       # Loop to generate plots for each column
 
+      pdf("TME_plots_imm_EPIC.pdf")
       for (col_name in column_names) {
         # Calculate means by design formula
         grouped_data <- dplyr::group_by(imm_epic, !!design_formula_sym)
@@ -1750,21 +1709,15 @@ output$download_treeplot2 <- downloadHandler(
                             hjust = 1.1, vjust = 1.1, size = 5, color = "red")
         print(plot)
       }
-      output$download_plot_imm_epic <- downloadHandler(
-        filename = function() { "plot.png" },
-        content = function(file) {
-          png(file)
-          print(plot)
-          dev.off()
-        }
-      )
+      dev.off()
+
 
 
       ############# imm_qti
       # Vector with column names except the last one
       column_names <- names(imm_qti)[-ncol(imm_qti)]
 
-      #pdf("plots_imm_qti.pdf")
+      pdf("TME_plots_imm_qti.pdf")
       for (col_name in column_names) {
         # Calculate means by design formula
         grouped_data <- dplyr::group_by(imm_qti, !!design_formula_sym)
@@ -1798,19 +1751,12 @@ output$download_treeplot2 <- downloadHandler(
                             hjust = 1.1, vjust = 1.1, size = 5, color = "red")
         print(plot)
       }
-      output$download_plot_imm_qti <- downloadHandler(
-        filename = function() { "plotimm_qti.png" },
-        content = function(file) {
-          png(file)
-          print(plot)
-          dev.off()
-        }
-      )
+      dev.off()
 
       ############# imm_xcell
       # Vector with column names except the last one
       column_names <- names(imm_xcell)[-ncol(imm_xcell)]
-      #pdf("plots_imm_xcell.pdf")
+      pdf("plots_imm_xcell.pdf")
       for (col_name in column_names) {
         # Calculate means by design formula
         grouped_data <- dplyr::group_by(imm_xcell, !!design_formula_sym)
@@ -1843,15 +1789,14 @@ output$download_treeplot2 <- downloadHandler(
                             hjust = 1.1, vjust = 1.1, size = 5, color = "red")
         print(plot)
       }
-      #dev.off()
-      output$download_plot_imm_xcell <- downloadHandler(
-        filename = function() { "plotimm_xcell.png" },
-        content = function(file) {
-          png(file)
-          print(plot)
-          dev.off()
-        }
-      )
+      dev.off()
+
+      output$TME <- renderText({
+        paste("Other Plots saved in ", paste(getwd(), sep = "/"))
+      })
+
+
+
       # Composición celular del TME i por grupo
 
       # Function to generate the bar plot for each sample
@@ -2008,15 +1953,13 @@ output$download_treeplot2 <- downloadHandler(
       combined_plot_xCell <- plot_combined(imm_xcell, paleta_extendida, "xCell Individual", "xCell Average", design_formula, "right")
 
       #pdf("plot_cell_fraction_Average_cell_fraction_EPIC.pdf", width = 11, height = 14)
-      print(combined_plot_EPIC)
+      #print(combined_plot_EPIC)
       #dev.off()
-
       #pdf("plot_cell_fraction_Average_cell_fraction_quanTIseq.pdf", width = 11, height = 14)
-      print(combined_plot_quanTIseq)
+      #print(combined_plot_quanTIseq)
       #dev.off()
-
       #pdf("plot_cell_fraction_Average_cell_fraction_xCell.pdf", width = 11, height = 14)
-      print(combined_plot_xCell)
+      #print(combined_plot_xCell)
       #dev.off()
 
       # Per a la visualització dels gràfics
@@ -2141,52 +2084,69 @@ output$download_treeplot2 <- downloadHandler(
       }
 
       # Apply the filtering and normality test for each dataset
-      cat("Apply the filtering and normality test for each dataset")
+      cat("Apply the filtering and normality test for each dataset\n")
       imm_qti_filtered <- filter_valid_columns(imm_qti, design_formula_sym, "quanTIseq")
       imm_epic_filtered <- filter_valid_columns(imm_epic, design_formula_sym, "EPIC")
       imm_xcell_filtered <- filter_valid_columns(imm_xcell, design_formula_sym, "xcell")
 
       # Perform the normality test
       if (ncol(imm_qti_filtered) > 1) {
-        cat("Performing Shapiro-Wilk test for quanTIseq")
+        cat("Performing Shapiro-Wilk test for quanTIseq\n")
         resultados_norm_imm_qti <- prueba_norm(imm_qti_filtered, design_formula_sym)
         print(resultados_norm_imm_qti)
+        output$resultados_norm_imm_qtiA <- renderPrint({
+          cat("Performing Shapiro-Wilk test for quanTIseq\n")
+          print(resultados_norm_imm_qti)
+        })
         # Perform parametric tests if normality is satisfied
-        cat("Performing parametric tests for quanTIseq")
-        output$paremtric_quanTIseq <- renderText({"Performing parametric tests for quanTIseq"})
-
+        cat("Performing parametric tests for quanTIseq\n")
         parametric_results_imm_qti <- perform_parametric_tests(imm_qti_filtered, design_formula_sym)
         print(parametric_results_imm_qti)
-        output$parametric_results_imm_qti_head <- renderPrint({print(parametric_results_imm_qti)})
+        output$parametric_results_imm_qtiA <- renderPrint({
+          cat("Performing parametric tests for quanTIseq\n")
+          print(parametric_results_imm_qti)
+        })
       } else {
-        cat("Can't perform Shapiro-Wilk test for quanTIseq. No valid columns available.")
+        cat("Can't perform Shapiro-Wilk test for quanTIseq. No valid columns available.\n")
       }
 
       if (ncol(imm_epic_filtered) > 1) {
-        cat("Performing Shapiro-Wilk test for EPIC")
+        cat("Performing Shapiro-Wilk test for EPIC\n")
         resultados_norm_epic <- prueba_norm(imm_epic_filtered, design_formula_sym)
         print(resultados_norm_epic)
+        output$resultados_norm_epicA <- renderPrint({
+          cat("Performing Shapiro-Wilk test for EPIC\n")
+          print(resultados_norm_epic)
+        })
+
         # Perform parametric tests if normality is satisfied
-        output$paremtric_epic <- renderText({"Performing parametric tests for EPIC"})
         parametric_results_epic <- perform_parametric_tests(imm_epic_filtered, design_formula_sym)
         print(parametric_results_epic)
-        output$parametric_results_epic_head <- renderPrint({print(parametric_results_epic)})
+        output$parametric_results_epicA <- renderPrint({
+          cat("Performing Shapiro-Wilk test for EPIC\n")
+          print(parametric_results_epic)
+        })
       } else {
-        cat("Can't perform Shapiro-Wilk test for EPIC. No valid columns available.")
+        cat("Can't perform Shapiro-Wilk test for EPIC. No valid columns available.\n")
       }
 
       if (ncol(imm_xcell_filtered) > 1) {
-        cat("Performing Shapiro-Wilk test for xcell")
+        cat("Performing Shapiro-Wilk test for xcell\n")
         resultados_norm_xcell <- prueba_norm(imm_xcell_filtered, design_formula_sym)
         print(resultados_norm_xcell)
+        output$resultados_norm_xcellA <- renderPrint({
+          cat("Performing Shapiro-Wilk test for xcell\n")
+          print(resultados_norm_xcell)
+        })
         # Perform parametric tests if normality is satisfied
-        cat("Performing parametric tests for xcell")
-        output$paremtric_xcell <- renderText({"Performing parametric tests for xcell"})
-
+        cat("Performing parametric tests for xcell\n")
         parametric_results_xcell <- perform_parametric_tests(imm_xcell_filtered, design_formula_sym)
-        output$parametric_results_xcell_head <- renderPrint({ print(parametric_results_xcell)})
+        output$parametric_results_xcellA <- renderPrint({
+          cat("Performing Shapiro-Wilk test for xcell\n")
+          print(parametric_results_xcell)
+        })
       } else {
-        cat("Can't perform Shapiro-Wilk test for xcell. No valid columns available.")
+        cat("Can't perform Shapiro-Wilk test for xcell. No valid columns available.\n")
       }
 
       ############# Heatmaps
@@ -2299,7 +2259,7 @@ output$download_treeplot2 <- downloadHandler(
           if (ncol(combined_data) == nrow(col_ann_data)) {
             col_ann_data <- as.data.frame(col_ann_data)
           } else {
-            stop("Dimensions of col_ann_data and combined_data do not match")
+            stop("Dimensions of col_ann_data and combined_data do not match\n")
           }
 
           annotation_col <- as.data.frame(col_ann_data[, design_formula, drop = FALSE])
@@ -2357,7 +2317,7 @@ output$download_treeplot2 <- downloadHandler(
         }
       }
 
-      cat("Heatmap of qti, EPIC and xcell will be stored on plots_TME_heatmap.pdf")
+      cat("Heatmap of qti, EPIC and xcell will be stored on plots_TME_heatmap.pdf\n")
 
       if (exists("Heatmap_qti")) {
         #pdf("plots_TME_Heatmap_qti.pdf", width = 15, height = 14)
@@ -2455,7 +2415,7 @@ output$download_treeplot2 <- downloadHandler(
       col_data<- as.data.frame(col_data)
       counts_filtered <- counts_filtered[, order(colnames(counts_filtered))]
       if (!identical(colnames(counts_filtered), col_data$id)) {
-        stop("Column names of counts_filtered and IDs in col_data do not match.")
+        stop("Column names of counts_filtered and IDs in col_data do not match.\n")
       }
 
       # Clean column names to avoid issues with special characters
@@ -2492,10 +2452,13 @@ output$download_treeplot2 <- downloadHandler(
 
       # Selecting genes
       if (!is.null(genes_to_use)) {
-        cat("Using provided genes")
+        cat("Using provided genes\n")
+        output$genes_used <- renderText({"Using provided genes"})
         top_genes <- genes_to_use
       } else if (exists("res")) {
-        cat("Selecting TOP 10 genes with the lowest padj")
+        cat("Selecting TOP 10 genes with the lowest padj\n")
+        output$genes_used2 <- renderText({"Selecting TOP 10 genes with the lowest padj"})
+
         output$top10 <- renderText({"Selecting TOP 10 genes with the lowest padj"})
         top_genes <- rownames(head(res[order(res$padj), ], 10))
         top_genes <- rownames(head(res[order(res$padj), ], 10))
@@ -2509,7 +2472,7 @@ output$download_treeplot2 <- downloadHandler(
       merged_data <- merge(col_data, selected_df_t, by = "id")
       merged_data[[time]] <- as.numeric(merged_data[[time]])
 
-      cat("Starting survival analysis.")
+      cat("Starting survival analysis.\n")
       output$startingsurvival <- renderText({"Starting survival analysis."})
 
       pdf("survival_analysis_plots_HTG_analyzer.pdf")
