@@ -119,8 +119,11 @@ ui <- fluidPage(
         condition = "input.survival_analysis == true",
         helpText("Specify the variable and time for survival analysis. Example: 'Recurrence_01' and 'Time_to_death_surv'."),
         textInput("variable_01", "Variable 01", "Recurrence_01"),
+        helpText("The variable coded 0 or 1 used for the survival analysis (e.g., Recurrence_01)."),
         textInput("time", "Time", "Time_to_death_surv"),
-        textInput("genes_to_use", "Genes to use", "CCND1,MMP10,CTTN")
+        helpText("The time variable for the survival analysis (e.g., Time_to_death_surv)."),
+        textInput("genes_to_use", "Genes to use", "CCND1,MMP10,CTTN"),
+        helpText("Genes to include in the analysis. Leave blank to use the top genes from DEA.")
       ),
 
       actionButton("run_analysis", "Run Analysis")
@@ -222,22 +225,23 @@ ui <- fluidPage(
       ),
       # RESULTS GSEA
       tabPanel("GSEA",
-      plotOutput("dotplot1", width = "100%", height = "400px"),
+      plotOutput("gsea_dotplot", width = "100%", height = "400px"),
       downloadButton("download_dotplot1", "Download Dotplot GSEA 1"),
-      plotOutput("dotplot2", width = "100%", height = "400px"),
+      plotOutput("gsea_dotplot2", width = "100%", height = "400px"),
       downloadButton("download_dotplot2", "Download Dotplot GSEA 2"),
-      plotOutput("emapplot1"),
+      plotOutput("gsea_emapplot"),
       downloadButton("download_emapplot", "Download Emapplot GSEA"),
-      plotOutput("ridgeplot1"),
+      plotOutput("gsea_emapplot"),
       downloadButton("download_ridgeplot", "Download Ridgeplot GSEA"),
-      plotOutput("heatplot1"),
+      plotOutput("gsea_heatplot"),
       downloadButton("download_heatplot", "Download Heatplot GSEA"),
-      plotOutput("treeplot1"),
+      plotOutput("gsea_treeplot2"),
       downloadButton("download_treeplot1", "Download Treeplot GSEA"),
-      plotOutput("a"),
+      plotOutput("gsea_a"),
       downloadButton("download_a", "Download GSEA Plot"),
-      plotOutput("b"),
+      plotOutput("gsea_b"),
       downloadButton("download_b", "Download Top 5 Gene Sets"),
+      textOutput("KEGGenrichmentstart"),
       plotOutput("gsea_dotplot3"),
       downloadButton("download_dotplot3", "Download KEGG Dotplot"),
       plotOutput("gsea_emapplot2"),
@@ -248,6 +252,7 @@ ui <- fluidPage(
       downloadButton("download_heatplot2", "Download KEGG Heatplot"),
       plotOutput("gsea_treeplot2"),
       downloadButton("download_treeplot2", "Download KEGG Treeplot"),
+      textOutput("goenrichmentstart"),
       plotOutput("go_bar_plot"),
       downloadButton("download_go_bar_plot", "Download GO Bar Plot"),
       plotOutput("go_bar_plot2"),
@@ -267,7 +272,6 @@ ui <- fluidPage(
       downloadButton("download_qti", "Download imm_qti.csv"),
       tableOutput("imm_xcell_table"),
       downloadButton("download_xcell", "Download imm_xcell.csv"),
-      verbatimTextOutput("TME"),
       plotOutput("plot_cell_fraction_EPIC"),
       downloadButton("download_plot_EPIC", "Descarregar EPIC"),
       plotOutput("plot_cell_fraction_quanTIseq"),
@@ -275,17 +279,21 @@ ui <- fluidPage(
       plotOutput("plot_cell_fraction_xCell"),
       downloadButton("download_plot_xCell", "Descarregar xCell"),
       verbatimTextOutput("resultados_norm_imm_qtiA"),
+      verbatimTextOutput("cantshapiro1"),
       verbatimTextOutput("parametric_results_imm_qtiA"),
       verbatimTextOutput("resultados_norm_epicA"),
       verbatimTextOutput("parametric_results_epicA"),
+      verbatimTextOutput("cantshapiro2"),
       verbatimTextOutput("resultados_norm_xcellA"),
       verbatimTextOutput("parametric_results_xcellA"),
+      verbatimTextOutput("cantshapiro3"),
       plotOutput("heatmap_qti"),
       downloadButton("download_heatmap_qti", "Download Heatmap qti"),
       plotOutput("heatmap_EPIC"),
       downloadButton("download_heatmap_EPIC", "Download Heatmap EPIC"),
       plotOutput("heatmap_xcell"),
-      downloadButton("download_heatmap_xcell", "Download Heatmap xcell")
+      downloadButton("download_heatmap_xcell", "Download Heatmap xcell"),
+      verbatimTextOutput("TME")
       ),
       # SURVIVAL
       tabPanel("Survival Analysis",
@@ -783,7 +791,7 @@ server <- function(input, output, session) {
 
 
       # Create the heatmap with ggplot2
-      a<- ggplot2::ggplot(bin_df_melted, ggplot2::aes(x = variable, y = Sample, fill = factor(value))) +
+      a_heatmap_QC<- ggplot2::ggplot(bin_df_melted, ggplot2::aes(x = variable, y = Sample, fill = factor(value))) +
         ggplot2::geom_tile(color = "white") +
         ggplot2::scale_fill_manual(values = c("0" = "#FFF9D0", "1" = "red"), labels = c("OK", "Outlier")) +
         ggplot2::labs(x = "QC Metrics", y = " ", fill = "QC Status") +
@@ -799,7 +807,7 @@ server <- function(input, output, session) {
         },
         content = function(file) {
           pdf(file)
-          print(a)
+          print(a_heatmap_QC)
           dev.off()}
       )
 
@@ -985,15 +993,26 @@ server <- function(input, output, session) {
       rownames(samplePoisDistMatrix) <- sample_ids
       colors <- grDevices::colorRampPalette(c("white", "#4793AF", "#013649"))(255)
 
+      bebe<-pheatmap::pheatmap(samplePoisDistMatrix,
+                               clustering_distance_rows = pois_distance$dd,
+                               clustering_distance_cols = pois_distance$dd,
+                               color = colors,
+                               main = "Poisson Distances Heatmap",
+                               width = 800,
+                               height = 600,
+                               display_numbers = FALSE,
+                               number_format = "%.2f",
+                               angle_col = 45)
+
       output$missatge4 <- renderText({"GENERATING POISSON DISTANCES PLOT"})
 
-      output$poison <- renderPlot({print(b)})
+      output$poison <- renderPlot({print(bebe)})
 
       output$download_poison <- downloadHandler(
         filename = function() { "DEA_poisson_distance.pdf" },
         content = function(file) {
           pdf(file, width = 10, height = 8)
-          print(b)
+          print(bebe)
           dev.off()
         }
       )
@@ -1006,7 +1025,7 @@ server <- function(input, output, session) {
       # colors <- grDevices::colorRampPalette(c("white", "#4793AF"))(255)
       output$missatge5 <- renderText({"GENERATING VSD DISTANCE HEATMAP"})
 
-      c<- pheatmap::pheatmap(
+      cecilia<- pheatmap::pheatmap(
         sampleDistMatrix,
         clustering_distance_rows = sampleDists,
         clustering_distance_cols = sampleDists,
@@ -1015,13 +1034,13 @@ server <- function(input, output, session) {
         main = "Sample Distance Heatmap",
         display_numbers = FALSE)
 
-      output$distance_heatmap <- renderPlot({print(c)})
+      output$distance_heatmap <- renderPlot({print(cecilia)})
 
       output$download_distance_heatmap <- downloadHandler(
         filename = function() { "DEA_Sample_Distance_Heatmap.pdf" },
         content = function(file) {
           pdf(file, width = 10, height = 8)
-          print(c)
+          print(cecilia)
           dev.off()
         }
       )
@@ -1191,10 +1210,12 @@ server <- function(input, output, session) {
         cat("Warning: The variable 'res' does not exist. GSEA analysis cannot proceed without it.")
       }
       else if (!inherits(res, "DESeqResults")) {
-        cat("Warning: The variable 'res' exists but is not of class 'DESeqResults'. GSEA analysis cannot proceed.")
+        cat("Warning: The variable 'res' exists but is not of class 'DESeqResults'. GSEA analysis cannot proceed.\n")
       }
       else {
-        cat("\033[33mSTARTING GSEA")
+        cat("Performing GSEA Analysis\n")
+        output$KEGGenrichmentstart <- renderText({"Performing GSEA Analysis"})
+
 
         # gseGO  Analysis
         cat("Performing gseGO Analysis")
@@ -1226,9 +1247,6 @@ server <- function(input, output, session) {
         cat("Creating Ridgeplot for gseGO ")
         ridgeplot1 <- enrichplot::ridgeplot(gse2)  +  ggplot2::labs(x = "gseGO enrichment distribution", font.size = 7) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
 
-
-
-
         # Ridgeplot for gseGO
         ridgeplot1 <- enrichplot::ridgeplot(gse2)  +  ggplot2::labs(x = "gseGO enrichment distribution", font.size = 7) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
 
@@ -1239,20 +1257,20 @@ server <- function(input, output, session) {
         treeplot1 <- suppressWarnings(enrichplot::treeplot(x2) + ggplot2::ggtitle("gseGO Treeplot"))
 
         # Create gseaplot2 plots with titles
-        a <- enrichplot::gseaplot2(gse2, geneSetID = 1, title = paste("GSEA Plot:", gse2$Description[1]))
-        b <- enrichplot::gseaplot2(gse2, geneSetID = 1:5, pvalue_table = TRUE, title = "GSEA: Top 5 Gene Sets")
+        abece <- enrichplot::gseaplot2(gse2, geneSetID = 1, title = paste("GSEA Plot:", gse2$Description[1]))
+        bcd <- enrichplot::gseaplot2(gse2, geneSetID = 1:5, pvalue_table = TRUE, title = "GSEA: Top 5 Gene Sets")
       output$gsea_dotplot <- renderPlot({print(dotplot1)})
       output$gsea_dotplot2 <- renderPlot({print(dotplot2)})
       output$gsea_emapplot <- renderPlot({print(emapplot1)})
       output$gsea_ridgeplot <- renderPlot({print(ridgeplot1)})
       output$gsea_heatplot <- renderPlot({print(heatplot1)})
       output$gsea_treeplot1 <- renderPlot({print(treeplot1)})
-      output$gsea_a <- renderPlot({print(a)})
-      output$gsea_b <- renderPlot({print(b)})
+      output$gsea_a <- renderPlot({print(abece)})
+      output$gsea_b <- renderPlot({print(bcd)})
       output$download_dotplot1 <- downloadHandler(
         filename = function() { paste("gsea_dotplot.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(dotplot1)
           dev.off()
         }
@@ -1260,7 +1278,7 @@ server <- function(input, output, session) {
       output$download_dotplot2 <- downloadHandler(
         filename = function() { paste("gsea_dotplot2.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(dotplot2)
           dev.off()
         }
@@ -1268,7 +1286,7 @@ server <- function(input, output, session) {
       output$download_emapplot <- downloadHandler(
         filename = function() { paste("gsea_emapplot.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(emapplot1)
           dev.off()
         }
@@ -1276,7 +1294,7 @@ server <- function(input, output, session) {
       output$download_ridgeplot <- downloadHandler(
         filename = function() { paste("gsea_ridgeplot.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(ridgeplot1)
           dev.off()
         }
@@ -1284,7 +1302,7 @@ server <- function(input, output, session) {
       output$download_heatplot <- downloadHandler(
         filename = function() { paste("gsea_heatplot.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(heatplot1)
           dev.off()
         }
@@ -1292,7 +1310,7 @@ server <- function(input, output, session) {
       output$download_treeplot1 <- downloadHandler(
         filename = function() { paste("gsea_treeplot1.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(treeplot1)
           dev.off()
         }
@@ -1301,21 +1319,24 @@ server <- function(input, output, session) {
       output$download_a <- downloadHandler(
         filename = function() { paste("gsea_GSEA_Plot.pdf") },
         content = function(file) {
-          pdf(file)
-          print(a)
+          pdf(file, width = 12, height = 14)
+          print(abece)
           dev.off()
         }
       )
       output$download_b <- downloadHandler(
         filename = function() { paste("gsea_GSEA_Top_5_Gene_Sets.pdf") },
         content = function(file) {
-          pdf(file)
-          print(b)
+          pdf(file, width = 12, height = 14)
+          print(bcs)
           dev.off()
         }
       )
 
         # KEGG Analysis
+      cat("Performing KEGG Analysis")
+      output$KEGGenrichmentstart <- renderText({"Performing KEGG Analysis"})
+
         ids <- clusterProfiler::bitr(names(original_gene_list), fromType = "SYMBOL", toType = "ENTREZID", OrgDb =  org.Hs.eg.db::org.Hs.eg.db)
         dedup_ids <- ids[!duplicated(ids[c("SYMBOL")]), ]
         df2 <- res[rownames(res) %in% dedup_ids$SYMBOL, ]
@@ -1332,13 +1353,11 @@ server <- function(input, output, session) {
         dotplot3 <- clusterProfiler::dotplot(kk2, showCategory = 10, title = "Enriched Pathways for KEGG", split = ".sign", font.size = 9) + ggplot2::facet_grid(.~.sign)
 
         # Emaplot for KEGG
-        cat("a")
         x3 <- enrichplot::pairwise_termsim(kk2)
         emapplot2 <- enrichplot::emapplot(x3) + ggplot2::ggtitle("KEGG Enrichment Map")
 
         # Ridgeplot for KEGG
         ridgeplot2 <- enrichplot::ridgeplot(kk2) +  ggplot2::labs(x = "KEGG enrichment distribution", font.size = 6) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
-        cat("b")
 
         # Heatplot for KEGG
         heatplot2 <- enrichplot::heatplot(kk2, showCategory = 10) + ggplot2::ggtitle("KEGG Heatplot")
@@ -1358,7 +1377,7 @@ server <- function(input, output, session) {
       output$download_dotplot3 <- downloadHandler(
         filename = function() { paste("KEGG_dotplot.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(dotplot3)
           dev.off()
         }
@@ -1366,7 +1385,7 @@ server <- function(input, output, session) {
       output$download_emapplot2 <- downloadHandler(
         filename = function() { paste("KEGG_emapplot.pdf") },
         content = function(file) {
-          pdf(file)
+          pdf(file, width = 12, height = 14)
           print(emapplot2)
           dev.off()
         }
@@ -1374,7 +1393,7 @@ server <- function(input, output, session) {
       output$download_ridgeplot2 <- downloadHandler(
     filename = function() { paste("KEGG_ridgeplot.pdf") },
     content = function(file) {
-    pdf(file)
+    pdf(file, width = 12, height = 14)
     print(ridgeplot2)
     dev.off()
   }
@@ -1382,7 +1401,7 @@ server <- function(input, output, session) {
 output$download_heatplot2 <- downloadHandler(
   filename = function() { paste("KEGG_heatplot.pdf") },
   content = function(file) {
-    pdf(file)
+    pdf(file, width = 12, height = 14)
     print(heatplot2)
     dev.off()
   }
@@ -1390,7 +1409,7 @@ output$download_heatplot2 <- downloadHandler(
 output$download_treeplot2 <- downloadHandler(
   filename = function() { paste("KEGG_treeplot1.pdf") },
   content = function(file) {
-    pdf(file)
+    pdf(file, width = 12, height = 14)
     print(treeplot2)
     dev.off()
   }
@@ -1399,6 +1418,8 @@ output$download_treeplot2 <- downloadHandler(
 
   # enrichGO Analysis
   cat("Performing GO Enrichment Analysis")
+  output$goenrichmentstart <- renderText({"Performing GO Enrichment Analysis"})
+
   sig_genes_df <- subset(res, padj < 0.05)
 
   if (nrow(sig_genes_df) > 0) {
@@ -1440,7 +1461,7 @@ output$download_treeplot2 <- downloadHandler(
             output$download_go_bar_plot <- downloadHandler(
               filename = function() { paste("GO_bar_plot.pdf") },
               content = function(file) {
-                pdf(file)
+                pdf(file, width = 12, height = 14)
                 print(bar_plot1)
                 dev.off()
               }
@@ -1480,8 +1501,8 @@ output$download_treeplot2 <- downloadHandler(
 
           output$download_go_bar_plot2 <- downloadHandler(
             filename = function() { paste("GO_bar_plot2.pdf") },
-            content = function(file) {
-              pdf(file)
+            content = function(file, width = 12, height = 14) {
+              pdf(file, width = 12, height = 14)
               print(bar_plot2)
               dev.off()
             }
@@ -1792,7 +1813,7 @@ output$download_treeplot2 <- downloadHandler(
       dev.off()
 
       output$TME <- renderText({
-        paste("Other Plots saved in ", paste(getwd(), sep = "/"))
+        paste("We have generated other plots stored all in ", paste(getwd(), sep = "/"))
       })
 
 
@@ -2108,6 +2129,9 @@ output$download_treeplot2 <- downloadHandler(
         })
       } else {
         cat("Can't perform Shapiro-Wilk test for quanTIseq. No valid columns available.\n")
+        output$cantshapiro1 <- renderText({
+          paste("Can't perform Shapiro-Wilk test for quanTIseq. No valid columns available.\n")
+        })
       }
 
       if (ncol(imm_epic_filtered) > 1) {
@@ -2128,6 +2152,9 @@ output$download_treeplot2 <- downloadHandler(
         })
       } else {
         cat("Can't perform Shapiro-Wilk test for EPIC. No valid columns available.\n")
+        output$cantshapiro2 <- renderText({
+          paste("Can't perform Shapiro-Wilk test for EPIC. No valid columns available.\n")
+        })
       }
 
       if (ncol(imm_xcell_filtered) > 1) {
@@ -2147,6 +2174,9 @@ output$download_treeplot2 <- downloadHandler(
         })
       } else {
         cat("Can't perform Shapiro-Wilk test for xcell. No valid columns available.\n")
+        output$cantshapiro3 <- renderText({
+          paste("Can't perform Shapiro-Wilk test for xcell. No valid columns available.\n")
+        })
       }
 
       ############# Heatmaps
@@ -2389,6 +2419,10 @@ output$download_treeplot2 <- downloadHandler(
     #####
     #####
     if (survival_analysis) {
+      cat("STARTING SURVIVAL ANALYSIS")
+      output$startsurvival <- renderText({
+        paste("STARTING SURVIVAL ANALYSIS\n")
+      })
       cat("STARTING SURVIVAL ANALYSIS")
       if (is.null(col_data[[time]]) || is.null(col_data[[variable_01]])) {
         stop("Variables for survival analysis are required.")
