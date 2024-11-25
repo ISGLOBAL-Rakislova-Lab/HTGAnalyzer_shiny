@@ -20,9 +20,15 @@ It is essential to have the HTGAnalyzer package installed to perform a complete 
 we have provided a user-friendly script for installation. Follow these steps:
 
 # 1. Install the R program
-Download and install the R software from the following link: https://cran.r-project.org/bin/windows/base/
+Download and install R software from the following link: [R version 4.4.2](https://cran.r-project.org/bin/windows/base/)
 Make sure to install version "4.4.2" of R for compatibility.
-- This setup can be used both in R and in RStudio if you have both programs installed on your system.
+- This setup works with both R and RStudio, so if you have both programs installed on your system, you can use either.
+
+We recommend using **RStudio** for a better visual interface, which enhances the user experience, but the code will work fine in **R** as well.
+
+To install RStudio, visit the following link: [Download RStudio](https://posit.co/download/rstudio-desktop/)
+This page also offers the option to install R along with RStudio, which is convenient for most users.
+
 
 # 2. Install necessary packages
 Run the following commands to install the renv and shiny packages if they are not already installed:
@@ -75,6 +81,8 @@ library(shiny)
 ```{r}
 runGitHub(repo = "HTGAnalyzer_shiny", username = "ISGLOBAL-Rakislova-Lab")
 ```
+We recommend that, in addition to using the Shiny app, you also keep an eye on the **R console** (or **RStudio console** if you're using RStudio). The console will provide complementary information, such as details on which processes are being executed, the steps completed, and any errors that may occur. This is helpful for troubleshooting and understanding the flow of the analysis.
+
 
 <div style="display: flex; justify-content: center; gap: 20px;">
     <img src="https://github.com/user-attachments/assets/25dbac67-84eb-4c58-af88-b7e67fdaec33" alt="Image 1" width="200"/>
