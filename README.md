@@ -1,4 +1,6 @@
-![HTGAnalyzer Logo](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/blob/main/www/HTGAnalyzer_logo.png)
+<p align="right">
+  <img src="https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/blob/main/www/HTGAnalyzer_logo.png" alt="HTGAnalyzer Logo" width="150">
+</p>
 
 # INSTALLATION INSTRUCTIONS
 The HTGAnalyzer package uses the renv package to ensure that all users have the same package versions as used during development.
