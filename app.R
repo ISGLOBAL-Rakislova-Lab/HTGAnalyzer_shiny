@@ -53,8 +53,13 @@ ui <- fluidPage(
       fileInput("annot_file", "Upload annotation file (.xlsx)", accept = c(".xlsx")),
       helpText("Select the type of data you're working with. Choose 'HTG' for HTG EdgeSeq data or 'RNAseq' for RNA-seq data."),
       selectInput("file_type", "Select file type", choices = c("HTG", "RNAseq"), selected = "HTG"),
-      helpText("Choose if you want to perform quality control on the data. This step is available for HTG data."),
-      checkboxInput("QC", "Quality Control (QC)", FALSE),
+      #helpText("Choose if you want to perform quality control on the data. This step is available for HTG data."),
+      #checkboxInput("QC", "Quality Control (QC)", FALSE),
+      conditionalPanel(
+        condition = "input.file_type == 'HTG'",
+        helpText("Choose if you want to perform quality control on the data. This step is available for HTG data."),
+        checkboxInput("QC", "Quality Control (QC)", FALSE)
+      ),
 
       conditionalPanel(
         condition = "input.file_type == 'HTG' && input.QC == true",
@@ -231,11 +236,11 @@ ui <- fluidPage(
       downloadButton("download_dotplot2", "Download Dotplot GSEA 2"),
       plotOutput("gsea_emapplot"),
       downloadButton("download_emapplot", "Download Emapplot GSEA"),
-      plotOutput("gsea_emapplot"),
+      plotOutput("gsea_ridgeplot"),
       downloadButton("download_ridgeplot", "Download Ridgeplot GSEA"),
       plotOutput("gsea_heatplot"),
       downloadButton("download_heatplot", "Download Heatplot GSEA"),
-      plotOutput("gsea_treeplot2"),
+      plotOutput("gsea_treeplot1"),
       downloadButton("download_treeplot1", "Download Treeplot GSEA"),
       plotOutput("gsea_a"),
       downloadButton("download_a", "Download GSEA Plot"),
@@ -265,7 +270,6 @@ ui <- fluidPage(
       textOutput("normalization_message"),
       tableOutput("tpm_table"),
       downloadButton("download_tpm", "Download TPM CSV"),
-      textOutput("cat_message"),
       tableOutput("imm_epic_table"),
       downloadButton("download_epic", "Download imm_epic.csv"),
       tableOutput("imm_qti_table"),
@@ -294,11 +298,11 @@ ui <- fluidPage(
       plotOutput("heatmap_xcell"),
       downloadButton("download_heatmap_xcell", "Download Heatmap xcell"),
       verbatimTextOutput("TME")
+
       ),
       # SURVIVAL
       tabPanel("Survival Analysis",
                textOutput("normalizing"),
-               textOutput("logrank"),
                textOutput("checkduplicates"),
                textOutput("duplicatesfound"),
                textOutput("noduplicates"),
@@ -310,6 +314,7 @@ ui <- fluidPage(
                textOutput("summaryfit"),
                tableOutput("fit1_df"),
                downloadButton("download_fit1_df", "Download Fit1 Table"),
+               textOutput("logrank"),
                verbatimTextOutput("surv_diff_output"),
                textOutput("survival")
 
@@ -800,7 +805,7 @@ server <- function(input, output, session) {
                        axis.text.y = ggplot2::element_text(size = 7),
                        legend.position = "bottom")
 
-      output$qc_plot_heatmap <- renderPlot({print(a) })
+      output$qc_plot_heatmap <- renderPlot({print(a_heatmap_QC) })
       output$download_qc_plot_heatmap <- downloadHandler(
         filename = function() {
           paste("QC_plots_heatmap.pdf")
@@ -814,7 +819,7 @@ server <- function(input, output, session) {
       rows_with_1 <- suppressWarnings(rownames(bin_matrix)[apply(bin_matrix, 1, any)])
       outliers<- rows_with_1
       output$outliers <- renderText({
-        paste("Los outliers son los siguientes:", paste(outliers, collapse = "/"))
+        paste("The outliers are the following:", paste(outliers, collapse = "/"))
       })
 
       #############################fi de QC
@@ -1207,7 +1212,7 @@ server <- function(input, output, session) {
     ####
     if (GSEA) {
       if (!exists("res")) {
-        cat("Warning: The variable 'res' does not exist. GSEA analysis cannot proceed without it.")
+        cat("Warning: The variable 'res' does not exist. GSEA analysis cannot proceed without it.\n")
       }
       else if (!inherits(res, "DESeqResults")) {
         cat("Warning: The variable 'res' exists but is not of class 'DESeqResults'. GSEA analysis cannot proceed.\n")
@@ -1218,8 +1223,8 @@ server <- function(input, output, session) {
 
 
         # gseGO  Analysis
-        cat("Performing gseGO Analysis")
-        cat("Preparing gene list for GSEA")
+        cat("Performing gseGO Analysis\n")
+        cat("Preparing gene list for GSEA\n")
         original_gene_list <- res$log2FoldChange
         names(original_gene_list) <- rownames(res)
         gene_list <- na.omit(original_gene_list)
@@ -1229,7 +1234,7 @@ server <- function(input, output, session) {
                                        OrgDb = org.Hs.eg.db::org.Hs.eg.db, pAdjustMethod = "bonferroni")
 
         # Dotplot for gseGO
-        cat("Creating Dotplot for gseGO ")
+        cat("Creating Dotplot for gseGO \n")
         dotplot1 <- clusterProfiler::dotplot(gse2, showCategory = 10, split = ".sign", font.size = 9, label_format = 40,
                                              title = "gseGO Enrichment Results: Pathways", color = "p.adjust", size = "Count")
 
@@ -1237,14 +1242,14 @@ server <- function(input, output, session) {
                                              title = "gseGO Enrichment Results: Pathways", color = "p.adjust", size = "Count") + ggplot2::facet_grid(.~.sign)
 
         # Emaplot for gseGO
-        cat("Creating Emaplot for gseGO ")
+        cat("Creating Emaplot for gseGO \n")
         x2 <- enrichplot::pairwise_termsim(gse2)
         #emapplot1 <- enrichplot::emapplot(x2, max.overlaps = 70, min.segment.length = 0.3, point_size = 0.3, font.size = 5) +   ggplot2::ggtitle("Enrichment Map gseGO ")
         emapplot1 <- enrichplot::emapplot(x2) + ggplot2::ggtitle("Enrichment Map gseGO ")
 
 
         # Ridgeplot for gseGO
-        cat("Creating Ridgeplot for gseGO ")
+        cat("Creating Ridgeplot for gseGO \n")
         ridgeplot1 <- enrichplot::ridgeplot(gse2)  +  ggplot2::labs(x = "gseGO enrichment distribution", font.size = 7) +  ggplot2::theme(axis.text.y = ggplot2::element_text(size = 9))
 
         # Ridgeplot for gseGO
@@ -1334,7 +1339,7 @@ server <- function(input, output, session) {
       )
 
         # KEGG Analysis
-      cat("Performing KEGG Analysis")
+      cat("Performing KEGG Analysis\n")
       output$KEGGenrichmentstart <- renderText({"Performing KEGG Analysis"})
 
         ids <- clusterProfiler::bitr(names(original_gene_list), fromType = "SYMBOL", toType = "ENTREZID", OrgDb =  org.Hs.eg.db::org.Hs.eg.db)
@@ -1361,10 +1366,9 @@ server <- function(input, output, session) {
 
         # Heatplot for KEGG
         heatplot2 <- enrichplot::heatplot(kk2, showCategory = 10) + ggplot2::ggtitle("KEGG Heatplot")
-        cat("c")
 
         # Treeplot for KEGG
-        cat("Creating Treeplot for KEGG ")
+        cat("Creating Treeplot for KEGG \n")
         treeplot2 <- suppressWarnings(enrichplot::treeplot(x3) + ggplot2::ggtitle("KEGG Treeplot"))
 
         upset_plot <- enrichplot::upsetplot(kk2) + ggplot2::labs(title = "Up set plot for KEGG")
@@ -1401,7 +1405,7 @@ server <- function(input, output, session) {
 output$download_heatplot2 <- downloadHandler(
   filename = function() { paste("KEGG_heatplot.pdf") },
   content = function(file) {
-    pdf(file, width = 12, height = 14)
+    pdf(file, width = 25, height = 14)
     print(heatplot2)
     dev.off()
   }
@@ -1417,7 +1421,7 @@ output$download_treeplot2 <- downloadHandler(
 
 
   # enrichGO Analysis
-  cat("Performing GO Enrichment Analysis")
+  cat("Performing GO Enrichment Analysis\n")
   output$goenrichmentstart <- renderText({"Performing GO Enrichment Analysis"})
 
   sig_genes_df <- subset(res, padj < 0.05)
@@ -1428,7 +1432,7 @@ output$download_treeplot2 <- downloadHandler(
     names(genes) <- rownames(sig_genes_df)
 
     # Perform GO enrichment analysis
-    cat("Performing GO Enrichment Analysis")
+    cat("Performing GO Enrichment Analysis\n")
     go_enrich <- clusterProfiler::enrichGO(
       gene = names(genes),
       universe = names(gene_list),
@@ -1441,7 +1445,7 @@ output$download_treeplot2 <- downloadHandler(
     )
 
           # Create a bar plot for significant GO terms
-          cat("Creating Bar Plot for GO Enrichment")
+          cat("Creating Bar Plot for GO Enrichment\n")
           go_results <- go_enrich@result
           significant_terms <- go_results[go_results$qvalue < 0.05, ]
           significant_terms <- significant_terms[order(significant_terms$qvalue), ]
@@ -1468,14 +1472,14 @@ output$download_treeplot2 <- downloadHandler(
             )
 
           } else {
-            cat("No significant GO terms found to plot.")
+            cat("No significant GO terms found to plot.\n")
           }
 
           # # Save the GO enrichment results to a CSV file
           # write.csv(go_results, "go_results.csv")
           # cat("GO enrichment results saved to 'go_results.csv'")
         } else {
-          cat("No significant genes found for GO enrichment analysis.")
+          cat("No significant genes found for GO enrichment analysis.\n")
         }
 
 
@@ -1516,7 +1520,7 @@ output$download_treeplot2 <- downloadHandler(
     ####
     ####
     if (TME) {
-      cat("STARTING TME")
+      cat("STARTING TME\n")
 
       if (!is.null(pattern)) {
         # Remove outliers based on pattern
@@ -1607,9 +1611,6 @@ output$download_treeplot2 <- downloadHandler(
       # write.csv(imm_epic, file = "imm_epic.csv")
       # write.csv(imm_qti, file = "imm_qti.csv")
       # write.csv(imm_xcell, file = "imm_xcell.csv")
-      output$cat_message <- renderText({
-        "Results of the TME will be stored in imm_epic.csv, imm_qti.csv and imm_xcell.csv"
-      })
 
       # Mostrar las primeras filas de los resultados como tabla
       output$imm_epic_table <- renderTable({head(imm_epic)})
@@ -1813,8 +1814,11 @@ output$download_treeplot2 <- downloadHandler(
       dev.off()
 
       output$TME <- renderText({
-        paste("We have generated other plots stored all in ", paste(getwd(), sep = "/"))
-      })
+        paste(
+          "Additional plots have been generated and are stored in:",
+          getwd(),
+          "The TME deconvolution results are saved in the following files: imm_epic.csv, imm_qti.csv, and imm_xcell.csv."
+        )      })
 
 
 
@@ -2059,10 +2063,10 @@ output$download_treeplot2 <- downloadHandler(
         unequal_columns_count <- base::sum(!equality_results)
 
         if (unequal_columns_count > 0) {
-          cat("In dataset", dataset_name, "the following columns have the same value in all rows and will be excluded from the analysis")
+          cat("In dataset", dataset_name, "the following columns have the same value in all rows and will be excluded from the analysis\n")
           print(names(df)[equality_results])
         } else {
-          cat("All columns in dataset", dataset_name, "have variability. No columns to exclude.")
+          cat("All columns in dataset", dataset_name, "have variability. No columns to exclude.\n")
         }
 
         valid_columns <- !equality_results
@@ -2232,7 +2236,7 @@ output$download_treeplot2 <- downloadHandler(
       AnnotData[[design_formula]] <- as.factor(AnnotData[[design_formula]])
 
       ################################### HEATMAP
-      cat("GENERATING HEATMAPS")
+      cat("GENERATING HEATMAPS\n")
       remove_nan_rows <- function(df) {
         # Remove rows with any NaN values
         df_cleaned <- df[!apply(df, 1, function(row) any(is.nan(row))), ]
@@ -2413,19 +2417,19 @@ output$download_treeplot2 <- downloadHandler(
       }
 
 
-    }else {cat("TME analysis skipped.")}
+    }else {cat("TME analysis skipped.\n")}
 
     #####
     #####
     #####
     if (survival_analysis) {
-      cat("STARTING SURVIVAL ANALYSIS")
+      cat("STARTING SURVIVAL ANALYSIS\n")
       output$startsurvival <- renderText({
         paste("STARTING SURVIVAL ANALYSIS\n")
       })
-      cat("STARTING SURVIVAL ANALYSIS")
+      cat("STARTING SURVIVAL ANALYSIS\n")
       if (is.null(col_data[[time]]) || is.null(col_data[[variable_01]])) {
-        stop("Variables for survival analysis are required.")
+        stop("Variables for survival analysis are required.\n")
       }
 
       if (!is.null(pattern)) {
@@ -2479,13 +2483,13 @@ output$download_treeplot2 <- downloadHandler(
       ids_data <- rownames(df_t)
 
       # Filter data
-      cat("Filtering data.")
+      cat("Filtering data.\n")
       subset_data <- dplyr::filter(col_data, id %in% ids_data)
       df_ta <- as.data.frame(df_t)
       df_ta$id <- rownames(df_ta)
 
       # Selecting genes
-      if (!is.null(genes_to_use)) {
+      if (!is.null(input$genes_to_use)&& input$genes_to_use != "") {
         cat("Using provided genes\n")
         output$genes_used <- renderText({"Using provided genes"})
         top_genes <- genes_to_use
@@ -2535,14 +2539,14 @@ output$download_treeplot2 <- downloadHandler(
         merged_data[[new_column_name]] <- factor(merged_data[[new_column_name]])
 
         # Fit survival model
-        cat("Fitting survival model")
+        cat("Fitting survival model\n")
         surv_object <- survival::Surv(merged_data$time, merged_data$variable_01)
         surv_formula <- as.formula(paste("surv_object ~", new_column_name))
 
         fit1 <- survival::survfit(surv_formula, data = merged_data)
 
         # Summary of the fit
-        cat("Summary of the fit")
+        cat("Summary of the fit\n")
         output$summaryfit <- renderText({"Summary of the fit"})
         print(summary(fit1))
         fit1_df <- data.frame(
@@ -2584,6 +2588,7 @@ output$download_treeplot2 <- downloadHandler(
 
         print(surv_diff)
         output$surv_diff_output <- renderPrint({
+          cat("As this part of the code is in a loop, we will show only the last one. Others will be stored but not shown.")
           print(surv_diff)
         })
         surv_diff_df <- data.frame(
@@ -2611,7 +2616,7 @@ output$download_treeplot2 <- downloadHandler(
                lty = 1,
                col = palette,
                lwd = 4)
-        cat("Plots and .csv saved in ", paste(getwd(), "survival_analysis_plots_top10.pdf", sep = "/"))
+        cat("Kaplan-Meier plot Plots (pdf) and and other statistics (.csv) will be saved in ", paste(getwd(), "survival_analysis_plots_top10.pdf", sep = "/"))
         output$survival <- renderText({
           paste("Plots and .csv saved in ", paste(getwd(), "survival_analysis_plots_top10.pdf", sep = "/"))
         })
@@ -2620,7 +2625,7 @@ output$download_treeplot2 <- downloadHandler(
       dev.off()
 
     } else {
-      cat("Skipping survival analysis.")
+      cat("Skipping survival analysis.\n")
     }
     ### HTG_analysis
     ###################################
