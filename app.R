@@ -63,18 +63,28 @@ ui <- fluidPage(
 
       conditionalPanel(
         condition = "input.file_type == 'HTG' && input.QC == true",
-        helpText("Set thresholds for various quality control parameters. Adjust as needed based on the data."),
+        helpText("Samples exceeding this threshold is a outlier"),
         numericInput("threshold_superior_pos", "Threshold superior pos", 5),
+        helpText("Samples between the Line Threshold and Superior Threshold (POS) are flagged as yellow."),
         numericInput("threshold_line_pos", "Threshold line pos", 4),
+        helpText("Samples between Threshold inferior lib and Threshold lib are flagged as yellow."),
         numericInput("threshold_inferior_lib", "Threshold inferior lib", 5e+06),
+        helpText("Samples not exceeding this threshold is a outlier"),
         numericInput("threshold_lib", "Threshold lib", 7e+06),
+        helpText("Samples between Threshold superior and Threshold line nc are flagged as yellow."),
         numericInput("threshold_superior_nc", "Threshold superior nc", 0.05),
+        helpText("Samples exceeding this threshold is a outlier"),
         numericInput("threshold_line_nc", "Threshold line nc", 0.045),
+        helpText("Samples between Threshold line gdna and Threshold superior gdna are flagged as yellow."),
         numericInput("threshold_superior_gdna", "Threshold superior gdna", 0.025),
+        helpText("Samples exceeding this threshold is a outlier"),
         numericInput("threshold_line_gdna", "Threshold line gdna", 0.02),
+        helpText("Samples between Threshold line ercc and Threshold superior ercc are flagged as yellow."),
         numericInput("threshold_superior_ercc", "Threshold superior ercc", 0.03),
+        helpText("Samples exceeding this threshold is a outlier"),
         numericInput("threshold_line_ercc", "Threshold line ercc", 0.025),
         numericInput("threshold_inferior_median", "Threshold inferior median", 3),
+        helpText("Samples not exceeding this threshold are marked as outliers."),
         numericInput("threshold_line_median", "Threshold line median", 5),
         helpText("Use a regular expression pattern to identify control probes in the count data."),
         textInput("pattern", "Pattern", "^NC-|^POS-|^GDNA-|^ERCC-"),
@@ -93,14 +103,19 @@ ui <- fluidPage(
 
       conditionalPanel(
         condition = "input.DEA == true",
-        helpText("Specify the design formula and contrast for DEA. Example: Design formula could be 'HPV_status'."),
+        helpText("Define the design formula and contrast for the differential expression analysis (DEA)."),
+        helpText("The design formula specifies the grouping variable for comparison (e.g., HPV_status)."),
         textInput("design_formula", "Design Formula", "HPV_status"),
+        helpText("The contrast defines the specific comparison within the design formula (e.g., 'Positive' vs 'Negative')."),
         textInput("contrast_input", "Contrast", 'c("HPV_status", "Positive", "Negative")'),
-        helpText("Set thresholds for gene expression filtering."),
-        numericInput("percentage_gene", "Percentage gene", 0.2),
-        numericInput("threshold_gene", "Threshold gene", 200),
-        numericInput("threshold_subject", "Threshold subject", 10),
-        helpText("Choose if you want to perform Gene Set Enrichment Analysis (GSEA) as part of DEA."),
+        helpText("Set criteria for filtering genes based on expression levels."),
+        helpText("Percentage gene: Minimum percentage of samples where a gene must be expressed."),
+        numericInput("percentage_gene", "Percentage Gene", 0.2),
+        helpText("Threshold gene: Minimum count threshold for a gene to be included."),
+        numericInput("threshold_gene", "Threshold Gene", 200),
+        helpText("Threshold subject: Minimum number of subjects required for a gene to pass filtering."),
+        numericInput("threshold_subject", "Threshold Subject", 10),
+        helpText("Optionally, perform Gene Set Enrichment Analysis (GSEA) to identify pathways associated with the results."),
         checkboxInput("GSEA", "Gene Set Enrichment Analysis (GSEA)", FALSE)
       ),
 
@@ -214,19 +229,20 @@ ui <- fluidPage(
       textOutput("missatge6"),
       plotOutput("vsd_boxplot", width = "100%", height = "400px"),
       downloadButton("download_vsd_boxplot", "Download Boxplot VSD"),
-      textOutput("topgenes"),
       textOutput("missatge7"),
       plotOutput("pca_plot", width = "100%", height = "400px"),
       downloadButton("download_pca_plot", "Download PCA plot"),
-      textOutput("missatge8"),
       textOutput("missatge9"),
       plotOutput("maPlot", width = "100%", height = "400px"),
       downloadButton("downloadMAPlot", "Download MA plot"),
+      textOutput("missatge8"),
       plotOutput("volvano", width = "100%", height = "400px"),
       downloadButton("downloadvolvano", "Download Volcano plot"),
       textOutput("missatge10"),
       plotOutput("dispersion", width = "100%", height = "400px"),
-      downloadButton("downloaddispersion", "Download Dispersion plot")
+      downloadButton("downloaddispersion", "Download Dispersion plot"),
+      textOutput("topgenes")
+
       ),
       # RESULTS GSEA
       tabPanel("GSEA",
@@ -515,7 +531,7 @@ server <- function(input, output, session) {
 
       # Configurar el archivo de descarga
       output$download_summary <- downloadHandler(
-        filename = function() { "summary_stats.csv" },
+        filename = function() { "QC_summary_stats.csv" },
         content = function(file) {
           write.csv(summary_stats, file, row.names = FALSE)
         })
@@ -716,7 +732,7 @@ server <- function(input, output, session) {
 
       #####
       output$download_pos_genes_plot <- downloadHandler(
-        filename = function() { "positive_control_plot.pdf" },
+        filename = function() { "QC_positive_control_plot.pdf" },
         content = function(file) {
           pdf(file)
           plot(ratios$`pos/genes`, xlab = "", ylab = "pos/genes", col = colores_pos,
@@ -729,7 +745,7 @@ server <- function(input, output, session) {
 
       # Descargar el gráfico de Library Size
       output$download_size_lib_plot <- downloadHandler(
-        filename = function() { "library_size_plot.pdf" },
+        filename = function() { "QC_library_size_plot.pdf" },
         content = function(file) {
           pdf(file)
           plot(lib_s2$Size, xlab = "", ylab = "Library Size", col = colores,
@@ -743,7 +759,7 @@ server <- function(input, output, session) {
 
       # Descargar el gráfico de Negative Control
       output$download_neg_plot <- downloadHandler(
-        filename = function() { "negative_control_plot.pdf" },
+        filename = function() { "QC_negative_control_plot.pdf" },
         content = function(file) {
           pdf(file)
           plot(ratios$`nc/genes`, xlab = "", ylab = "nc/genes", col = colores_nc,
@@ -756,7 +772,7 @@ server <- function(input, output, session) {
 
       # Descargar el gráfico de Genomic DNA
       output$download_gdna_plot <- downloadHandler(
-        filename = function() { "gdna_plot.pdf" },
+        filename = function() { "QC_gdna_plot.pdf" },
         content = function(file) {
           pdf(file)
           plot(ratios$`gdna/genes`, xlab = "", ylab = "gdna/genes", col = colores_gdna,
@@ -769,7 +785,7 @@ server <- function(input, output, session) {
 
       # Descargar el gráfico de ERCC
       output$download_ercc_plot <- downloadHandler(
-        filename = function() { "ercc_plot.pdf" },
+        filename = function() { "QC_ercc_plot.pdf" },
         content = function(file) {
           pdf(file)
           plot(ratios$`ERCC/genes`, xlab = "", ylab = "ERCC/genes", col = colores_ercc,
@@ -782,7 +798,7 @@ server <- function(input, output, session) {
 
       # Descargar el gráfico de Median
       output$download_med_plot <- downloadHandler(
-        filename = function() { "median_plot.pdf" },
+        filename = function() { "QC_median_plot.pdf" },
         content = function(file) {
           pdf(file)
           plot(ratios$median, xlab = "", ylab = "Median", col = colores_med,
@@ -939,7 +955,7 @@ server <- function(input, output, session) {
        output$printtop10_contrast <- renderPrint({print(head(res[order(res$padj), ], 10))})
 
     output$download_res <- downloadHandler(
-      filename = function() { "Results_contrast_DEA.csv" },
+      filename = function() { "DEA_Results_contrast_DEA.csv" },
       content = function(file) {
         write.csv(res, file, row.names = TRUE)
       }
@@ -982,7 +998,7 @@ server <- function(input, output, session) {
       output$correlation_heatmap <- renderPlot({print(aa)})
 
       output$download_correlation_heatmap <- downloadHandler(
-        filename = function() { "Sample_Correlation_Heatmap.pdf" },
+        filename = function() { "DEA_Sample_Correlation_Heatmap.pdf" },
         content = function(file) {
           pdf(file)
           print(aa)
@@ -1062,7 +1078,7 @@ server <- function(input, output, session) {
       top_genes_indices <- head(row.names(res_sorted), 10)
 
       output$topgenes <- renderText({
-        paste("Plots for individual plot will be store in", paste(getwd(), "DEA_ gene_expression_plots.pdf", sep = "/"))
+        paste("Individual gene expression plots will will be store in", paste(getwd(), "DEA_ gene_expression_plots.pdf", sep = "/"))
       })
 
       pdf("DEA_ gene_expression_plots.pdf")
@@ -1100,7 +1116,7 @@ server <- function(input, output, session) {
 
     # Función para descargar el boxplot
     output$download_vsd_boxplot <- downloadHandler(
-      filename = function() { "VSD_Boxplot.pdf" },
+      filename = function() { "DEA_VSD_Boxplot.pdf" },
       content = function(file) {
         pdf(file, width = 10, height = 8)
         graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
@@ -1273,7 +1289,7 @@ server <- function(input, output, session) {
       output$gsea_a <- renderPlot({print(abece)})
       output$gsea_b <- renderPlot({print(bcd)})
       output$download_dotplot1 <- downloadHandler(
-        filename = function() { paste("gsea_dotplot.pdf") },
+        filename = function() { paste("gsea_dotplot_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(dotplot1)
@@ -1281,7 +1297,7 @@ server <- function(input, output, session) {
         }
       )
       output$download_dotplot2 <- downloadHandler(
-        filename = function() { paste("gsea_dotplot2.pdf") },
+        filename = function() { paste("gsea_dotplot2_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(dotplot2)
@@ -1289,7 +1305,7 @@ server <- function(input, output, session) {
         }
       )
       output$download_emapplot <- downloadHandler(
-        filename = function() { paste("gsea_emapplot.pdf") },
+        filename = function() { paste("gsea_emapplot_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(emapplot1)
@@ -1297,7 +1313,7 @@ server <- function(input, output, session) {
         }
       )
       output$download_ridgeplot <- downloadHandler(
-        filename = function() { paste("gsea_ridgeplot.pdf") },
+        filename = function() { paste("gsea_ridgeplot_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(ridgeplot1)
@@ -1305,15 +1321,15 @@ server <- function(input, output, session) {
         }
       )
       output$download_heatplot <- downloadHandler(
-        filename = function() { paste("gsea_heatplot.pdf") },
+        filename = function() { paste("gsea_heatplot_gseGO.pdf") },
         content = function(file) {
-          pdf(file, width = 12, height = 14)
+          pdf(file, width = 25, height = 14)
           print(heatplot1)
           dev.off()
         }
       )
       output$download_treeplot1 <- downloadHandler(
-        filename = function() { paste("gsea_treeplot1.pdf") },
+        filename = function() { paste("gsea_treeplot1_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(treeplot1)
@@ -1322,7 +1338,7 @@ server <- function(input, output, session) {
       )
 
       output$download_a <- downloadHandler(
-        filename = function() { paste("gsea_GSEA_Plot.pdf") },
+        filename = function() { paste("gsea_GSEA_Plot_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(abece)
@@ -1330,7 +1346,7 @@ server <- function(input, output, session) {
         }
       )
       output$download_b <- downloadHandler(
-        filename = function() { paste("gsea_GSEA_Top_5_Gene_Sets.pdf") },
+        filename = function() { paste("gsea_GSEA_Top_5_Gene_Sets_gseGO.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(bcs)
@@ -1379,7 +1395,7 @@ server <- function(input, output, session) {
       output$gsea_treeplot2 <- renderPlot({print(treeplot2)})
 
       output$download_dotplot3 <- downloadHandler(
-        filename = function() { paste("KEGG_dotplot.pdf") },
+        filename = function() { paste("GSEA_KEGG_dotplot_KEGG.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(dotplot3)
@@ -1387,7 +1403,7 @@ server <- function(input, output, session) {
         }
       )
       output$download_emapplot2 <- downloadHandler(
-        filename = function() { paste("KEGG_emapplot.pdf") },
+        filename = function() { paste("GSEA_KEGG_emapplot_KEGG.pdf") },
         content = function(file) {
           pdf(file, width = 12, height = 14)
           print(emapplot2)
@@ -1395,7 +1411,7 @@ server <- function(input, output, session) {
         }
       )
       output$download_ridgeplot2 <- downloadHandler(
-    filename = function() { paste("KEGG_ridgeplot.pdf") },
+    filename = function() { paste("GSEA_KEGG_ridgeplot_KEGG.pdf") },
     content = function(file) {
     pdf(file, width = 12, height = 14)
     print(ridgeplot2)
@@ -1403,7 +1419,7 @@ server <- function(input, output, session) {
   }
 )
 output$download_heatplot2 <- downloadHandler(
-  filename = function() { paste("KEGG_heatplot.pdf") },
+  filename = function() { paste("GSEA_KEGG_heatplot_KEGG.pdf") },
   content = function(file) {
     pdf(file, width = 25, height = 14)
     print(heatplot2)
@@ -1411,7 +1427,7 @@ output$download_heatplot2 <- downloadHandler(
   }
 )
 output$download_treeplot2 <- downloadHandler(
-  filename = function() { paste("KEGG_treeplot1.pdf") },
+  filename = function() { paste("GSEA_KEGG_treeplot1_KEGG.pdf") },
   content = function(file) {
     pdf(file, width = 12, height = 14)
     print(treeplot2)
@@ -1463,7 +1479,7 @@ output$download_treeplot2 <- downloadHandler(
             })
 
             output$download_go_bar_plot <- downloadHandler(
-              filename = function() { paste("GO_bar_plot.pdf") },
+              filename = function() { paste("GSEA_GO_bar_plot.pdf") },
               content = function(file) {
                 pdf(file, width = 12, height = 14)
                 print(bar_plot1)
@@ -1504,7 +1520,7 @@ output$download_treeplot2 <- downloadHandler(
           })
 
           output$download_go_bar_plot2 <- downloadHandler(
-            filename = function() { paste("GO_bar_plot2.pdf") },
+            filename = function() { paste("GSEA_GO_bar_plot2_enrichGO.pdf") },
             content = function(file, width = 12, height = 14) {
               pdf(file, width = 12, height = 14)
               print(bar_plot2)
@@ -1815,9 +1831,9 @@ output$download_treeplot2 <- downloadHandler(
 
       output$TME <- renderText({
         paste(
-          "Additional plots have been generated and are stored in:",
+          "Additional plots have been generated and are stored in:\n",
           getwd(),
-          "The TME deconvolution results are saved in the following files: imm_epic.csv, imm_qti.csv, and imm_xcell.csv."
+          "\n The TME deconvolution results are saved in the following files: imm_epic.csv, imm_qti.csv, and imm_xcell.csv."
         )      })
 
 
@@ -2002,7 +2018,7 @@ output$download_treeplot2 <- downloadHandler(
 
       # Per a la descàrrega dels gràfics en format PDF
       output$download_plot_EPIC <- downloadHandler(
-        filename = function() { "plot_cell_fraction_Average_cell_fraction_EPIC.pdf" },
+        filename = function() { "TME_plot_cell_fraction_Average_cell_fraction_EPIC.pdf" },
         content = function(file) {
           pdf(file, width = 11, height = 14)
           print(combined_plot_EPIC)
@@ -2011,7 +2027,7 @@ output$download_treeplot2 <- downloadHandler(
       )
 
       output$download_plot_quanTIseq <- downloadHandler(
-        filename = function() { "plot_cell_fraction_Average_cell_fraction_quanTIseq.pdf" },
+        filename = function() { "TME_plot_cell_fraction_Average_cell_fraction_quanTIseq.pdf" },
         content = function(file) {
           pdf(file, width = 11, height = 14)
           print(combined_plot_quanTIseq)
@@ -2020,7 +2036,7 @@ output$download_treeplot2 <- downloadHandler(
       )
 
       output$download_plot_xCell <- downloadHandler(
-        filename = function() { "plot_cell_fraction_Average_cell_fraction_xCell.pdf" },
+        filename = function() { "TME_plot_cell_fraction_Average_cell_fraction_xCell.pdf" },
         content = function(file) {
           pdf(file, width = 11, height = 14)
           print(combined_plot_xCell)
