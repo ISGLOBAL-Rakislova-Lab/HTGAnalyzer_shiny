@@ -1,6 +1,7 @@
 <p align="right">
   <img src="https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/blob/main/www/HTGAnalyzer_logo.png" alt="HTGAnalyzer Logo" width="150">
 </p>
+
 # Introduction
 
 This repository contains the Shiny app for the **HTGAnalyzer** package. If you are looking for the R package, you can find it in the following link: [HTGAnalyzer R Package](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/blob/main/README.md).
