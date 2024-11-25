@@ -22,13 +22,18 @@ install.packages("shiny")
 Use the renv package to ensure all dependencies are installed in their correct versions.
 The renv.lock file from the GitHub repository will guide the installation.
 ```{r}
+# Activate library
 library("renv")
+
+# Download the file renv.lock
 if (!file.exists("renv.lock")) {
   download.file(
     url = "https://raw.githubusercontent.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/main/renv.lock",
     destfile = "renv.lock"
   )
 }
+
+# Install the packages
 renv::restore(lockfile = "renv.lock")
 ## SELECT OPTION 1.
 ```
