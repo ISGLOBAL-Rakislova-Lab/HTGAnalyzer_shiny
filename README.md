@@ -1,3 +1,5 @@
+![HTGAnalyzer Logo](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/blob/main/www/HTGAnalyzer_logo.png)
+
 # INSTALLATION INSTRUCTIONS
 The HTGAnalyzer package uses the renv package to ensure that all users have the same package versions as used during development.
 It is essential to have the HTGAnalyzer package installed to perform a complete analysis. If you are not familiar with R, 
