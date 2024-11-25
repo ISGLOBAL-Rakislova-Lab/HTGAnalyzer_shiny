@@ -22,6 +22,7 @@ we have provided a user-friendly script for installation. Follow these steps:
 # 1. Install the R program
 Download and install the R software from the following link: https://cran.r-project.org/bin/windows/base/
 Make sure to install version "4.4.2" of R for compatibility.
+- This setup can be used both in R and in RStudio if you have both programs installed on your system.
 
 # 2. Install necessary packages
 Run the following commands to install the renv and shiny packages if they are not already installed:
