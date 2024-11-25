@@ -23,7 +23,14 @@ Use the renv package to ensure all dependencies are installed in their correct v
 The renv.lock file from the GitHub repository will guide the installation.
 ```{r}
 library("renv")
-renv::restore(lockfile = "https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/blob/main/renv.lock")
+if (!file.exists("renv.lock")) {
+  download.file(
+    url = "https://raw.githubusercontent.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/main/renv.lock",
+    destfile = "renv.lock"
+  )
+}
+renv::restore(lockfile = "renv.lock")
+## SELECT OPTION 1.
 ```
 # SHINY APP FOR QUALITY CONTROL (QC)
 If you only need to perform Quality Control (QC) of the transcriptomic data, you can use the online Shiny app:
