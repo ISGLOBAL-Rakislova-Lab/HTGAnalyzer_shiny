@@ -606,11 +606,11 @@
       "Version": "0.99.0",
       "Source": "GitHub",
       "RemoteType": "github",
-      "RemoteHost": "api.github.com",
       "RemoteUsername": "IOBR",
       "RemoteRepo": "IOBR",
       "RemoteRef": "master",
-      "RemoteSha": "7f201ea78b7100fbf6da9421667c61ff318e43ca",
+      "RemoteSha": "4547bbb9c428bf0e735ad08e2ca0e6c276c1d229",
+      "RemoteHost": "api.github.com",
       "Requirements": [
         "ComplexHeatmap",
         "DESeq2",
@@ -644,7 +644,7 @@
         "tidyverse",
         "timeROC"
       ],
-      "Hash": "1e64d3c8560563755989c3d3e58ac2e6"
+      "Hash": "96fd9210009fd324c74ae49a20832d2e"
     },
     "IRanges": {
       "Package": "IRanges",
@@ -2876,6 +2876,22 @@
       ],
       "Hash": "349f4d37cd47f834992fcba95549ca45"
     },
+    "ggupset": {
+      "Package": "ggupset",
+      "Version": "0.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "ggplot2",
+        "grid",
+        "gtable",
+        "rlang",
+        "scales",
+        "tibble"
+      ],
+      "Hash": "78c97266d46bcec37e7dbd1820d88845"
+    },
     "gh": {
       "Package": "gh",
       "Version": "1.4.1",
@@ -4440,7 +4456,7 @@
     },
     "progressr": {
       "Package": "progressr",
-      "Version": "0.15.0",
+      "Version": "0.15.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -4448,7 +4464,7 @@
         "digest",
         "utils"
       ],
-      "Hash": "b3727a8cfc03525cc44a5f2854d6e025"
+      "Hash": "f8e9876b6ffff900e83f171081cacd6f"
     },
     "promises": {
       "Package": "promises",
@@ -4537,7 +4553,7 @@
     },
     "quantreg": {
       "Package": "quantreg",
-      "Version": "5.99",
+      "Version": "5.99.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -4551,7 +4567,7 @@
         "stats",
         "survival"
       ],
-      "Hash": "c6e207b874494a7ac4d52f02dcd7d3af"
+      "Hash": "c48844cd7961de506a1b4d22b2e082c7"
     },
     "qvalue": {
       "Package": "qvalue",
