@@ -4,21 +4,14 @@
 
 # Introduction
 
-This repository contains the Shiny app for the **HTGAnalyzer** package. If you are looking for the R package, you can find it in the following link: [HTGAnalyzer R Package](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/blob/main/README.md).
-
-The **HTGAnalyzer** package is designed to facilitate the analysis of HTG EdgeSeq and RNA sequencing data. It includes the **HTG_auto** function, which automates several key analyses, such as:
+This repository contains the Shiny app for the **HTGAnalyzer** package. If you are looking for the R package, you can find it in the following link: [HTGAnalyzer R Package](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/blob/main/README.md). The **HTGAnalyzer Shiny app** is designed to facilitate the quality control and transcriptomic analysis of HTG EdgeSeq and RNA sequencing data with minimal bioinformatical knowledge. It uses the **HTG_auto** function from the **HTGAnalyzer package**, which automates: 
 * Quality control (QC) 
 * Differential gene expression analysis (DEA)
 * Tumor microenvironment profiling (TME)
 * Survival analysis 
 * Gene set enrichment analysis (GSEA)
 
-For those who need more control over the analyses or wish to perform the full package analysis, you can install and use the complete **HTGAnalyzer** R package.
-
-**NOTE:** On the other hand, if you only need to recognize outliers, perform quality control (QC), or conduct statistical analysis, you can use the Shiny app for **HTGAnalyzer** available at: [HTGAnalyzer Shiny App](https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/).
-
-Feel free to use the Shiny app for easier interaction with the QC process and statistical analysis or install the full **HTGAnalyzer** package if you need to perform more comprehensive analyses.
-
+**NOTE:** If you only need to recognize outliers, perform quality control (QC), or conduct statistical analysis, you can also use the Shiny app for **HTGAnalyzer** available at: [HTGAnalyzer Shiny App](https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/).
 
 
 # INSTALLATION INSTRUCTIONS
@@ -37,16 +30,14 @@ To download and install **RStudio**, use the following link:[Download RStudio](h
 
 This page also offers an option to install R alongside RStudio, which is convenient for most users.
 
-## 2: Install necessary packages
+## 2: Install necessary R packages
 Instructions for installing the HTGAnalyzer package and the Shiny app can be found here:
 * [HTGAnalyzer Installation Guide](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/tree/main)
   
+Once you have R installed and the necessary packages restored, you can start using the Shiny app locally.
 
 # USAGE INSTRUCTIONS
-Once you have R installed and the necessary packages restored, you can run the Shiny app locally by using the following commands:
-
-## 1. Load the shiny library and run the Shiny app directly from GitHub
-From now on, as packages are installed, you will only need to copy and paste this command.
+After successfully  installed, copy and paste the following command in R to run the Shiny app directly from Github.
 ```{r}
 library(shiny)
 runGitHub(repo = "HTGAnalyzer_shiny", username = "ISGLOBAL-Rakislova-Lab")
