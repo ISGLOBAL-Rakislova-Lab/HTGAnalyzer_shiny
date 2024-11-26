@@ -26,7 +26,7 @@ The HTGAnalyzer package uses the renv package to ensure that all users have the 
 It is essential to have the HTGAnalyzer package installed to perform a complete analysis. If you are not familiar with R, 
 we have provided a user-friendly script for installation. Follow these steps:
 
-## 1. Install the R program
+## 1. Install the R
 Download and install the R software from the following link:  [R version 4.4.2](https://cran.r-project.org/bin/windows/base/)
 
 * Ensure that you install version **"4.4.2"** of R for compatibility.
