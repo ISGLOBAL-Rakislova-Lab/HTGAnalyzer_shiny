@@ -6,13 +6,20 @@
 
 This repository contains the Shiny app for the **HTGAnalyzer** package. If you are looking for the R package, you can find it in the following link: [HTGAnalyzer R Package](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/blob/main/README.md).
 
-The **HTGAnalyzer** package is designed to facilitate the analysis of HTG EdgeSeq and RNA sequencing data. It includes the **HTG_auto** function, which automates several key analyses, such as quality control, differential gene expression analysis, tumor microenvironment profiling, survival analysis, and gene set enrichment analysis.
+The **HTGAnalyzer** package is designed to facilitate the analysis of HTG EdgeSeq and RNA sequencing data. It includes the **HTG_auto** function, which automates several key analyses, such as:
+* Quality control (QC) 
+* Differential gene expression analysis (DEA)
+* Tumor microenvironment profiling (TME)
+* Survival analysis 
+* Gene set enrichment analysis (GSEA)
 
 For those who need more control over the analyses or wish to perform the full package analysis, you can install and use the complete **HTGAnalyzer** R package.
 
-On the other hand, if you only need to recognize outliers, perform quality control (QC), or conduct statistical analysis, you can use the Shiny app for **HTGAnalyzer** available at: [HTGAnalyzer Shiny App](https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/).
+**NOTE:** On the other hand, if you only need to recognize outliers, perform quality control (QC), or conduct statistical analysis, you can use the Shiny app for **HTGAnalyzer** available at: [HTGAnalyzer Shiny App](https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/).
 
 Feel free to use the Shiny app for easier interaction with the QC process and statistical analysis or install the full **HTGAnalyzer** package if you need to perform more comprehensive analyses.
+
+
 
 # INSTALLATION INSTRUCTIONS
 The HTGAnalyzer package uses the renv package to ensure that all users have the same package versions as used during development.
@@ -33,20 +40,7 @@ This page also offers an option to install R alongside RStudio, which is conveni
 ## 2: Install necessary packages
 Instructions for installing the HTGAnalyzer package and the Shiny app can be found here:
 * [HTGAnalyzer Installation Guide](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/tree/main)
-
-
-# SHINY APP WITHOUT INSTALLATION FOR QUALITY CONTROL (QC)
-If you only need to perform Quality Control (QC) of the transcriptomic data, you can use the online Shiny app:
-* https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/
-
-# COMPLETE ANALYSIS WITH HTGAnalyzer PACKAGE
-The HTGAnalyzer package is an R package designed for the analysis of HTG EdgeSeq data and RNA sequencing results.
-It includes tools for:
-- Quality Control (QC)
-- Differential gene expression analysis
-- Tumor microenvironment profiling
-- Survival analysis
-- Gene set enrichment analysis (GSEA)
+  
 
 # USAGE INSTRUCTIONS
 Once you have R installed and the necessary packages restored, you can run the Shiny app locally by using the following commands:
