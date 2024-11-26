@@ -42,7 +42,9 @@ Use the renv package to ensure all dependencies are installed in their correct v
 The renv.lock file from the GitHub repository will guide the installation.
 ```{r}
 # Activate library
-library("renv")
+library(renv)
+library(shiny)
+
 
 # Download the file renv.lock
 if (!file.exists("renv.lock")) {
@@ -72,13 +74,10 @@ It includes tools for:
 # USAGE INSTRUCTIONS
 Once you have R installed and the necessary packages restored, you can run the Shiny app locally by using the following commands:
 
-# 1. Load the shiny library
+# 1. Load the shiny library and run the Shiny app directly from GitHub
+From now on, as packages are installed, you will only need to copy and paste this command.
 ```{r}
 library(shiny)
-```
-
-# 2. Run the Shiny app directly from GitHub
-```{r}
 runGitHub(repo = "HTGAnalyzer_shiny", username = "ISGLOBAL-Rakislova-Lab")
 ```
 We recommend that, in addition to using the Shiny app, you also keep an eye on the **R console** (or **RStudio console** if you're using RStudio). The console will provide complementary information, such as details on which processes are being executed, the steps completed, and any errors that may occur. This is helpful for troubleshooting and understanding the flow of the analysis.
