@@ -19,46 +19,23 @@ The HTGAnalyzer package uses the renv package to ensure that all users have the 
 It is essential to have the HTGAnalyzer package installed to perform a complete analysis. If you are not familiar with R, 
 we have provided a user-friendly script for installation. Follow these steps:
 
-# 1. Install the R program
-Download and install R software from the following link: [R version 4.4.2](https://cran.r-project.org/bin/windows/base/)
-Make sure to install version "4.4.2" of R for compatibility.
-- This setup works with both R and RStudio, so if you have both programs installed on your system, you can use either.
+## 1. Install the R program
+Download and install the R software from the following link:  [R version 4.4.2](https://cran.r-project.org/bin/windows/base/)
 
-We recommend using **RStudio** for a better visual interface, which enhances the user experience, but the code will work fine in **R** as well.
+* Ensure that you install version **"4.4.2"** of R for compatibility.
+* This setup is compatible with both **R** and **RStudio**. If you have both installed, you can use either program to run the code.
+* We recommend using RStudio for its enhanced visual interface, which improves the user experience. However, the code will work perfectly fine in R as well.
 
-To install RStudio, visit the following link: [Download RStudio](https://posit.co/download/rstudio-desktop/)
-This page also offers the option to install R along with RStudio, which is convenient for most users.
+To download and install **RStudio**, use the following link:[Download RStudio](https://posit.co/download/rstudio-desktop/)
 
+This page also offers an option to install R alongside RStudio, which is convenient for most users.
 
-# 2. Install necessary packages
-Run the following commands to install the renv and shiny packages if they are not already installed:
-```{r}
-install.packages("renv")
-install.packages("shiny")
-```
-
-# 3. Restore the package environment
-Use the renv package to ensure all dependencies are installed in their correct versions.
-The renv.lock file from the GitHub repository will guide the installation.
-```{r}
-# Activate library
-library(renv)
-library(shiny)
+## 2: Install necessary packages
+Instructions for installing the HTGAnalyzer package and the Shiny app can be found here:
+* [HTGAnalyzer Installation Guide](https://github.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer/tree/main)
 
 
-# Download the file renv.lock
-if (!file.exists("renv.lock")) {
-  download.file(
-    url = "https://raw.githubusercontent.com/ISGLOBAL-Rakislova-Lab/HTGAnalyzer_shiny/main/renv.lock",
-    destfile = "renv.lock"
-  )
-}
-
-# Install the packages
-renv::restore(lockfile = "renv.lock")
-## SELECT OPTION 1.
-```
-# SHINY APP FOR QUALITY CONTROL (QC)
+# SHINY APP WITHOUT INSTALLATION FOR QUALITY CONTROL (QC)
 If you only need to perform Quality Control (QC) of the transcriptomic data, you can use the online Shiny app:
 * https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/
 
@@ -74,7 +51,7 @@ It includes tools for:
 # USAGE INSTRUCTIONS
 Once you have R installed and the necessary packages restored, you can run the Shiny app locally by using the following commands:
 
-# 1. Load the shiny library and run the Shiny app directly from GitHub
+## 1. Load the shiny library and run the Shiny app directly from GitHub
 From now on, as packages are installed, you will only need to copy and paste this command.
 ```{r}
 library(shiny)
