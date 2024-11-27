@@ -216,8 +216,8 @@ ui <- fluidPage(
       textOutput("missatge_size_factors_plot"),
       plotOutput("size_factors_plot", width = "100%", height = "400px"),
       downloadButton("download_DEA_plot", "Download Size Factors Plot"),
-      plotOutput("correlation_heatmap", width = "100%", height = "400px"),
       textOutput("correlation_heatmap_mes"),
+      plotOutput("correlation_heatmap", width = "100%", height = "400px"),
       downloadButton("download_correlation_heatmap", "Download correlation heatmap"),
       plotOutput("poisson_heatmap", width = "100%", height = "400px"),
       textOutput("missatge4"),
@@ -471,7 +471,7 @@ server <- function(input, output, session) {
     output$dimension_output1 <- renderText({dims_message1})
 
     if (ncol(counts_data) == nrow(col_data)) {
-      cat("The filtered data sets are now aligned.")
+      cat("The filtered data sets are now aligned.\n")
     } else {
       cat("There is a mismatch in the number of columns in counts_data_filtered and rows in col_data_filtered.")
     }
@@ -857,7 +857,7 @@ server <- function(input, output, session) {
 
     if (pattern == "") {
 
-      output$filtering_data <- renderText({"FILTERING THE COUNT DATA. DELETING THE PROVES..."})
+      output$filtering_data <- renderText({"FILTERING THE COUNT DATA. DELETING THE PROVES...\n"})
       counts_data <- subset(counts_data, !grepl(pattern, rownames(counts_data)))
     }
 
@@ -876,7 +876,7 @@ server <- function(input, output, session) {
     ####
     ####
     if (DEA) {
-       output$missatge2 <- renderText({"STARTING THE DIFERENTIAN EXPRESSION ANALYSIS."})
+       output$missatge2 <- renderText({"STARTING THE DIFERENTIAN EXPRESSION ANALYSIS.\n"})
        cat("STARTING THE DIFERENTIAN EXPRESSION ANALYSIS.\n")
 
 
