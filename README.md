@@ -11,7 +11,7 @@ This repository contains the Shiny app for the **HTGAnalyzer** package. If you a
 * Survival analysis 
 * Gene set enrichment analysis (GSEA)
 
-**NOTE:** If you only need to recognize outliers, perform quality control (QC), or conduct statistical analysis, you can also use the Shiny app for **HTGAnalyzer** available at: [HTGAnalyzer Shiny App](https://isglobal-rakislova-lab.shinyapps.io/htganalyzer_shiny/).
+**NOTE:** If you only need to recognize outliers, perform quality control (QC), or conduct statistical analysis, you can also use the Shiny app for **HTGAnalyzer** available at: [HTGAnalyzer Shiny App](http://isglobal-rakislova-lab.shinyapps.io/htg_shinny_app-main).
 
 
 # INSTALLATION INSTRUCTIONS
