@@ -6,6 +6,9 @@
 #
 #    https://shiny.posit.co/
 #
+library(plotly)
+library(heatmaply)
+
 library(renv)
 library(shiny)
 library(shinythemes)
@@ -106,8 +109,8 @@ ui <- fluidPage(
         helpText("Define the design formula and contrast for the differential expression analysis (DEA)."),
         helpText("The design formula specifies the grouping variable for comparison (e.g., HPV_status)."),
         textInput("design_formula", "Design Formula", "HPV_status"),
-        helpText("The contrast defines the specific comparison within the design formula (e.g., 'Positive' vs 'Negative')."),
-        textInput("contrast_input", "Contrast", 'c("HPV_status", "Positive", "Negative")'),
+        helpText("The contrast defines the specific comparison within the design formula (e.g., 'Associated' vs 'Independent')."),
+        textInput("contrast_input", "Contrast", 'c("HPV_status", "Associated", "Independent")'),
         helpText("Set criteria for filtering genes based on expression levels."),
         helpText("Percentage gene: Minimum percentage of samples where a gene must be expressed."),
         numericInput("percentage_gene", "Percentage Gene", 0.2),
@@ -125,7 +128,7 @@ ui <- fluidPage(
         checkboxInput("generate_heatmap", "Generate Heatmap", FALSE),
         conditionalPanel(
           condition = "input.generate_heatmap == true",
-          textInput("heatmap_columns", "Heatmap columns", "HPV_status,Ciclina_D1")
+          textInput("heatmap_columns", "Heatmap columns", "HPV_status,Cyclin_D1")
         )
       ),
 
@@ -178,19 +181,19 @@ ui <- fluidPage(
       tableOutput("ratiosb"),
       downloadButton("download_summary", "Download Summary Stats"),
       downloadButton("download_ratiosb", "Download QC Results"),
-      plotOutput("pos_genes_plot", width = "100%", height = "400px"),
+      plotlyOutput("pos_genes_plot", width = "100%", height = "400px"),
       downloadButton("download_pos_genes_plot", "Download Positive Control Plot (PDF)"),
-      plotOutput("size_lib", width = "100%", height = "400px"),
+      plotlyOutput("size_lib", width = "100%", height = "400px"),
       downloadButton("download_size_lib_plot", "Download Library Size Plot (PDF)"),
-      plotOutput("neg", width = "100%", height = "400px"),
+      plotlyOutput("neg", width = "100%", height = "400px"),
       downloadButton("download_neg_plot", "Download Negative Control Plot (PDF)"),
-      plotOutput("gdna", width = "100%", height = "400px"),
+      plotlyOutput("gdna", width = "100%", height = "400px"),
       downloadButton("download_gdna_plot", "Download Genomic DNA Plot (PDF)"),
-      plotOutput("ERCC", width = "100%", height = "400px"),
+      plotlyOutput("ERCC", width = "100%", height = "400px"),
       downloadButton("download_ercc_plot", "Download ERCC Plot (PDF)"),
-      plotOutput("med", width = "100%", height = "400px"),
+      plotlyOutput("med", width = "100%", height = "400px"),
       downloadButton("download_med_plot", "Download Median Plot (PDF)"),
-      plotOutput("qc_plot_heatmap", width = "100%", height = "400px"),
+      plotlyOutput("qc_plot_heatmap", width = "100%", height = "400px"),
       downloadButton("download_qc_plot_heatmap", "Download QC Heatmap PDF"),
       textOutput("outliers")
       ),
@@ -214,26 +217,25 @@ ui <- fluidPage(
       verbatimTextOutput("printtop10_contrast"),
       downloadButton("download_res", "Download DEA results"),
       textOutput("missatge_size_factors_plot"),
-      plotOutput("size_factors_plot", width = "100%", height = "400px"),
+      plotlyOutput("size_factors_plot", width = "100%", height = "400px"),
       downloadButton("download_DEA_plot", "Download Size Factors Plot"),
       textOutput("correlation_heatmap_mes"),
-      plotOutput("correlation_heatmap", width = "100%", height = "400px"),
+      plotlyOutput("correlation_heatmap", width = "100%", height = "400px"),
       downloadButton("download_correlation_heatmap", "Download correlation heatmap"),
-      plotOutput("poisson_heatmap", width = "100%", height = "400px"),
       textOutput("missatge4"),
       plotOutput("poison", width = "100%", height = "400px"),
       downloadButton("download_poison", "Download poisson distance"),
       textOutput("missatge5"),
-      plotOutput("distance_heatmap", width = "100%", height = "400px"),
+      plotlyOutput("distance_heatmap", width = "100%", height = "400px"),
       downloadButton("download_distance_heatmap", "DEA Sample Distance Heatmap"),
       textOutput("missatge6"),
-      plotOutput("vsd_boxplot", width = "100%", height = "400px"),
+      plotlyOutput("vsd_boxplot", width = "100%", height = "400px"),
       downloadButton("download_vsd_boxplot", "Download Boxplot VSD"),
       textOutput("missatge7"),
-      plotOutput("pca_plot", width = "100%", height = "400px"),
+      plotlyOutput("pca_plot", width = "100%", height = "400px"),
       downloadButton("download_pca_plot", "Download PCA plot"),
       textOutput("missatge9"),
-      plotOutput("maPlot", width = "100%", height = "400px"),
+      plotlyOutput("maPlot", width = "100%", height = "400px"),
       downloadButton("downloadMAPlot", "Download MA plot"),
       textOutput("missatge8"),
       plotOutput("volvano", width = "100%", height = "400px"),
@@ -690,58 +692,71 @@ server <- function(input, output, session) {
       colores_med <- ifelse(ratios$median < threshold_inferior_median, "red",
                             ifelse(ratios$median <= threshold_line_median, "#FFC470", "#4793AF"))
 
-      ######
-      # Plotting
-      output$pos_genes_plot <- renderPlot({
-        plot(ratios$`pos/genes`, xlab = "", ylab = "pos/genes", col = colores_pos,
-             xaxt = "n", pch = 19, main = "Positive control 4% (QC0)", ylim = c(0, max_value_pos))
-        axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
-        abline(h = threshold_line_pos, col = "red")
+      ######    PLOTS QC
+      output$pos_genes_plot <- renderPlotly({
+        df <- data.frame(Sample = rownames(ratios), Value = ratios$`pos/genes`)
+        p <- ggplot(df, aes(x = Sample, y = Value)) +
+          geom_point(color = colores_pos) +
+          geom_hline(yintercept = threshold_line_pos, color = "red") +
+          labs(title = "Positive control 4% (QC0)", y = "pos/genes", x = "") +
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        ggplotly(p)
       })
-      output$size_lib <- renderPlot({
-        plot(lib_s2$Size, xlab = "", ylab = "Library Size", col = colores,
-             xaxt = "n", pch = 19, main = "Library Size per Sample (QC1)", cex.axis = 0.8,
-             ylim = c(min_size_lib, max_size_lib))
-        axis(1, at = 1:length(lib_s2$Sample), labels = lib_s2$Sample, las = 2, cex.axis = 0.8)
-        abline(h = threshold_lib, col = "red")
+      
+      output$size_lib <- renderPlotly({
+        df <- lib_s2
+        p <- ggplot(df, aes(x = Sample, y = Size)) +
+          geom_point(color = colores) +
+          geom_hline(yintercept = threshold_lib, color = "red") +
+          labs(title = "Library Size per Sample (QC1)", y = "Library Size", x = "") +
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        ggplotly(p)
       })
-      output$neg <- renderPlot({
-        plot(ratios$`nc/genes`, xlab = "", ylab = "nc/genes", col = colores_nc,
-             xaxt = "n", pch = 19, main = "Negative Control (QC2)", ylim = c(min_value_neg, max_value_neg))
-        axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
-        abline(h = threshold_line_nc, col = "red")
+      
+      
+      output$neg <- renderPlotly({
+        df <- data.frame(Sample = rownames(ratios), Value = ratios$`nc/genes`)
+        p <- ggplot(df, aes(x = Sample, y = Value)) +
+          geom_point(color = colores_nc) +
+          geom_hline(yintercept = threshold_line_nc, color = "red") +
+          labs(title = "Negative Control (QC2)", y = "nc/genes", x = "") +
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        ggplotly(p)
       })
-      output$gdna <- renderPlot({
-        plot(ratios$`gdna/genes`, xlab = "", ylab = "gdna/genes", col = colores_gdna,
-             xaxt = "n", pch = 19, main = "Genomic DNA (QC3)", ylim = c(0, max_value_gdna))
-        axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
-        abline(h = threshold_line_gdna, col = "red")
+      
+      
+      output$gdna <- renderPlotly({
+        df <- data.frame(Sample = rownames(ratios), Value = ratios$`gdna/genes`)
+        p <- ggplot(df, aes(x = Sample, y = Value)) +
+          geom_point(color = colores_gdna) +
+          geom_hline(yintercept = threshold_line_gdna, color = "red") +
+          labs(title = "Genomic DNA (QC3)", y = "gdna/genes", x = "") +
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        ggplotly(p)
       })
-      output$ERCC <- renderPlot({
-        plot(ratios$`ERCC/genes`, xlab = "", ylab = "ERCC/genes", col = colores_ercc,
-             xaxt = "n", pch = 19, main = "ERCC (QC4)", ylim = c(0, max_value_ERCC))
-        axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
-        abline(h = threshold_line_ercc, col = "red")
+      
+      
+      output$ERCC <- renderPlotly({
+        df <- data.frame(Sample = rownames(ratios), Value = ratios$`ERCC/genes`)
+        p <- ggplot(df, aes(x = Sample, y = Value)) +
+          geom_point(color = colores_ercc) +
+          geom_hline(yintercept = threshold_line_ercc, color = "red") +
+          labs(title = "ERCC (QC4)", y = "ERCC/genes", x = "") +
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        ggplotly(p)
       })
-      output$med <- renderPlot({
-        plot(ratios$median, xlab = "", ylab = "Median", col = colores_med,
-             xaxt = "n", pch = 19, main = "Median (QC5)", ylim = c(0, max_value_med))
-        axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
-        abline(h = threshold_line_median, col = "red")
+      
+      output$med <- renderPlotly({
+        df <- data.frame(Sample = rownames(ratios), Value = ratios$median)
+        p <- ggplot(df, aes(x = Sample, y = Value)) +
+          geom_point(color = colores_med) +
+          geom_hline(yintercept = threshold_line_median, color = "red") +
+          labs(title = "Median (QC5)", y = "Median", x = "") +
+          theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        ggplotly(p)
       })
-
-      #####
-      output$download_pos_genes_plot <- downloadHandler(
-        filename = function() { "QC_positive_control_plot.pdf" },
-        content = function(file) {
-          pdf(file)
-          plot(ratios$`pos/genes`, xlab = "", ylab = "pos/genes", col = colores_pos,
-               xaxt = "n", pch = 19, main = "Positive control 4% (QC0)", ylim = c(0, max_value_pos))
-          axis(1, at = 1:nrow(ratios), labels = rownames(ratios), las = 2, cex.axis = 0.8)
-          abline(h = threshold_line_pos, col = "red")
-          dev.off()
-        }
-      )
+      
+      
 
       # Descargar el gráfico de Library Size
       output$download_size_lib_plot <- downloadHandler(
@@ -756,7 +771,7 @@ server <- function(input, output, session) {
           dev.off()
         }
       )
-
+      
       # Descargar el gráfico de Negative Control
       output$download_neg_plot <- downloadHandler(
         filename = function() { "QC_negative_control_plot.pdf" },
@@ -820,8 +835,16 @@ server <- function(input, output, session) {
         ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
                        axis.text.y = ggplot2::element_text(size = 7),
                        legend.position = "bottom")
-
-      output$qc_plot_heatmap <- renderPlot({print(a_heatmap_QC) })
+      #output$qc_plot_heatmap <- renderPlot({print(a_heatmap_QC) })
+      output$qc_plot_heatmap <- renderPlotly({
+        p <- ggplot(bin_df_melted, aes(x = variable, y = Sample, fill = factor(value))) +
+          geom_tile(color = "white") +
+          scale_fill_manual(values = c("0" =  "#FFF9D0", "1" = "red")) +
+          labs(x = "QC Metric", y = "Sample", fill = "Fail") +
+          theme_minimal() +
+          theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        ggplotly(p)
+      })
       output$download_qc_plot_heatmap <- downloadHandler(
         filename = function() {
           paste("QC_plots_heatmap.pdf")
@@ -933,6 +956,7 @@ server <- function(input, output, session) {
                                annotation_col = df)
 
          output$DEA_heatmap <- renderPlot({print(lola)})
+        
          output$DEA_heatmap_download <- downloadHandler(
            filename = function() {
              paste("DEA_heatmap.pdf")
@@ -966,24 +990,38 @@ server <- function(input, output, session) {
 
 
       output$missatge_size_factors_plot <- renderText({"SIZE FACTORS PLOT"})
-      output$size_factors_plot <- renderPlot({plot(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)),
-           xlab = "Size Factors", ylab = "Column Sums of Counts",
-           main = "Size Factors vs. Column Sums")
-      text(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)), labels = colnames(DESeq2::counts(dds)), pos = 3, cex = 0.7)
-      abline(lm(colSums(DESeq2::counts(dds)) ~ DESeq2::sizeFactors(dds) + 0))})
-
+      
+     
+      output$size_factors_plot <- renderPlotly({
+        x <- DESeq2::sizeFactors(dds)
+        y <- colSums(DESeq2::counts(dds))
+        labels <- colnames(DESeq2::counts(dds))
+        fit <- lm(y ~ x + 0)  # model amb intercept = 0
+        plot_ly(x = x, y = y, type = 'scatter', mode = 'markers+text',
+                text = labels,
+                textposition = 'top center',
+                marker = list(size = 8),
+                hoverinfo = 'text',
+                name = "Samples") %>%
+          add_lines(x = x, y = predict(fit), name = "Regression line", line = list(color = 'red')) %>%
+          layout(title = "Size Factors vs. Column Sums",
+                 xaxis = list(title = "Size Factors"),
+                 yaxis = list(title = "Column Sums of Counts"))
+      })
+      
       output$download_DEA_plot <- downloadHandler(
-      filename = function() { "DEA_plot.pdf" },
-      content = function(file) {
-        pdf(file)
-        plot(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)),
+        filename = function() { "DEA_plot.pdf" },
+        content = function(file) {
+          pdf(file)
+          plot(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)),
                xlab = "Size Factors", ylab = "Column Sums of Counts",
                main = "Size Factors vs. Column Sums")
-        text(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)), labels = colnames(DESeq2::counts(dds)), pos = 3, cex = 0.7)
-        abline(lm(colSums(DESeq2::counts(dds)) ~ DESeq2::sizeFactors(dds) + 0))
-        dev.off()
-      }
-    )
+          text(DESeq2::sizeFactors(dds), colSums(DESeq2::counts(dds)), labels = colnames(DESeq2::counts(dds)), pos = 3, cex = 0.7)
+          abline(lm(colSums(DESeq2::counts(dds)) ~ DESeq2::sizeFactors(dds) + 0))
+          dev.off()
+        }
+      )
+      
       vsd_cor <- cor(SummarizedExperiment::assay(vsd))
       sample_ids <- vsd$id
       annotation_col <- data.frame(SampleID = sample_ids)
@@ -995,7 +1033,19 @@ server <- function(input, output, session) {
                              annotation_col = annotation_col,
                              annotation_legend = FALSE)
       output$correlation_heatmap_mes <- renderText({"CORRELATION HEATMAP"})
-      output$correlation_heatmap <- renderPlot({print(aa)})
+      output$correlation_heatmap <- renderPlotly({
+        heatmaply(
+          vsd_cor,
+          main = "Sample-to-Sample Correlation Heatmap",
+          col_side_colors = annotation_col,  # només a dalt
+          showticklabels = c(TRUE, TRUE),
+          dendrogram = "none",
+          margins = c(100, 100, 40, 20),
+          fontsize_row = 8,
+          fontsize_col = 8
+        )
+      })
+      
 
       output$download_correlation_heatmap <- downloadHandler(
         filename = function() { "DEA_Sample_Correlation_Heatmap.pdf" },
@@ -1026,9 +1076,8 @@ server <- function(input, output, session) {
                                angle_col = 45)
 
       output$missatge4 <- renderText({"GENERATING POISSON DISTANCES PLOT"})
-
       output$poison <- renderPlot({print(bebe)})
-
+      
       output$download_poison <- downloadHandler(
         filename = function() { "DEA_poisson_distance.pdf" },
         content = function(file) {
@@ -1055,8 +1104,23 @@ server <- function(input, output, session) {
         main = "Sample Distance Heatmap",
         display_numbers = FALSE)
 
-      output$distance_heatmap <- renderPlot({print(cecilia)})
-
+      output$distance_heatmap <- renderPlotly({
+        heatmaply(
+          sampleDistMatrix,
+          main = "Sample Distance Heatmap",
+          dendrogram = "both",
+          showticklabels = c(TRUE, TRUE),
+          labCol = colnames(sampleDistMatrix),
+          labRow = rownames(sampleDistMatrix),
+          fontsize_row = 8,
+          fontsize_col = 8,
+          colors = viridis::viridis(256),
+          width = 1000,  # Amplada del heatmap
+          height = 800   # Altura del heatmap
+          # colors = colors  # Descomenta si vols afegir colors personalitzats
+        )
+      })
+      
       output$download_distance_heatmap <- downloadHandler(
         filename = function() { "DEA_Sample_Distance_Heatmap.pdf" },
         content = function(file) {
@@ -1070,8 +1134,22 @@ server <- function(input, output, session) {
 
       d<- graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
       ## Renderizar el gráfico de boxplot
-      output$vsd_boxplot <- renderPlot({
-        graphics::boxplot(SummarizedExperiment::assay(vsd), las = 2, main = "vsd", cex.axis = 0.6)
+      output$vsd_boxplot <- renderPlotly({
+        plot_ly(
+          y = SummarizedExperiment::assay(vsd), 
+          type = "box", 
+          boxpoints = "all",  # Show all points
+          jitter = 0.05,  # Jitter for individual points
+          marker = list(color = 'rgba(0, 0, 255, 0.4)'),  # Customize point color
+          line = list(color = 'rgb(0, 0, 0)'),
+          name = "vsd"
+        ) %>%
+          layout(
+            title = "vsd",
+            xaxis = list(title = "Samples", showticklabels = TRUE, tickangle = 45),
+            yaxis = list(title = "Expression Level"),
+            showlegend = FALSE
+          )
       })
 
       res_sorted <- res[order(res$padj), ]
@@ -1151,9 +1229,31 @@ server <- function(input, output, session) {
           legend.title = ggplot2::element_text(size = 25),        # Título de la leyenda
           legend.text = ggplot2::element_text(size = 20)          # Texto de los elementos de la leyenda
         )
-
-    output$pca_plot <- renderPlot({print(pca_plot)})
-    output$download_pca_plot <- downloadHandler(
+      
+      output$pca_plot <- renderPlotly({
+        p <- ggplot2::ggplot(pca_data, ggplot2::aes(x = PC1, y = PC2, color = Condition_Group)) +
+          ggplot2::geom_point(size = 3) +
+          ggrepel::geom_text_repel(ggplot2::aes(label = Sample), size = 8, max.overlaps = 15) +
+          ggplot2::labs(title = "PCA of Normalized Counts",
+                        x = "Principal Component 1",
+                        y = "Principal Component 2") +
+          ggplot2::theme_minimal() +
+          ggplot2::scale_color_manual(values = color_palette) +
+          ggplot2::theme(
+            legend.position = "right",
+            plot.title = ggplot2::element_text(size = 25),
+            axis.title.x = ggplot2::element_text(size = 25),
+            axis.title.y = ggplot2::element_text(size = 25),
+            axis.text = ggplot2::element_text(size = 20),
+            legend.title = ggplot2::element_text(size = 25),
+            legend.text = ggplot2::element_text(size = 20)
+          )
+        
+        plotly::ggplotly(p, tooltip = c("x", "y", "label", "color"))  # Tooltip personalitzat
+      })
+      
+      
+      output$download_pca_plot <- downloadHandler(
       filename = function() { "DEA_PCA.pdf" },
       content = function(file) {
         pdf(file, width = 10, height = 8)
@@ -1167,18 +1267,7 @@ server <- function(input, output, session) {
                                               x = 'log2FoldChange',
                                               y = 'padj',
                                               pCutoff = 5e-2)
-      output$volvano <- renderPlot({volcan})
-      output$downloadvolvano <- downloadHandler(
-        filename = function() {
-          paste("DEA_volcano.pdf")
-        },
-        content = function(file) {
-          pdf
-          volcan
-          dev.off()
-        }
-      )
-
+      
       output$downloadvolvano <- downloadHandler(
         filename = function() {
           paste("DEA_volcano.pdf")
@@ -1189,10 +1278,46 @@ server <- function(input, output, session) {
 
           dev.off()
         })
-
+      
+  
+      output$volvano <- renderPlot({volcan})
+      
 
       output$missatge9 <- renderText({"GENERATING MA PLOT"})
-      output$maPlot <- renderPlot({DESeq2::plotMA(res, main = "MA Plot of Results")})
+      #output$maPlot <- renderPlot({DESeq2::plotMA(res, main = "MA Plot of Results")})
+      output$maPlot <- renderPlotly({
+        # Preparem les dades per l'MA plot
+        res_df <- as.data.frame(res)
+        res_df$mean <- res_df$baseMean
+        res_df$log2FC <- res_df$log2FoldChange
+        res_df$padj <- res_df$padj
+        res_df$gene <- rownames(res_df)
+        
+        # Eliminar NA per evitar errors a plotly
+        res_df <- res_df[!is.na(res_df$log2FC) & !is.na(res_df$mean), ]
+        
+        # Defineix colors segons significació
+        res_df$color <- ifelse(res_df$padj < 0.05, "Significant", "Not significant")
+        
+        plot_ly(
+          data = res_df,
+          x = ~log10(mean + 1),  # per log transformació suau
+          y = ~log2FC,
+          text = ~gene,
+          color = ~color,
+          colors = c("grey", "red"),
+          type = "scatter",
+          mode = "markers",
+          marker = list(size = 5, opacity = 0.7)
+        ) %>%
+          layout(
+            title = "Interactive MA Plot",
+            xaxis = list(title = "log10(Mean of Normalized Counts)"),
+            yaxis = list(title = "log2 Fold Change"),
+            showlegend = TRUE
+          )
+      })
+      
     output$downloadMAPlot <- downloadHandler(
       filename = function() {
         paste("MA_plot.pdf")
@@ -1209,8 +1334,11 @@ server <- function(input, output, session) {
       output$missatge10 <- renderText({"GENERATING DISPERSION PLOT"})
 
 
-    output$dispersion <- renderPlot({DESeq2::plotDispEsts(dds, main = "DIPERSION PLOT")})
-    output$downloaddispersion<- downloadHandler(
+      output$dispersion <- renderPlot({
+        # Generamos el gráfico estático utilizando DESeq2
+        DESeq2::plotDispEsts(dds, main = "Dispersion Plot")
+      })
+      output$downloaddispersion<- downloadHandler(
       filename = function() {
         paste("DEA_dispersion_plot.pdf")
       },
