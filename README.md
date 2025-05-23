@@ -45,8 +45,7 @@ runGitHub(repo = "HTGAnalyzer_shiny", username = "ISGLOBAL-Rakislova-Lab")
 We recommend that, in addition to using the Shiny app, you also keep an eye on the **R console** (or **RStudio console** if you're using RStudio). The console will provide complementary information, such as details on which processes are being executed, the steps completed, and any errors that may occur. This is helpful for troubleshooting and understanding the flow of the analysis.
 
 HTGAnalyzer is a registered digital work under intellectual property law.  
-> Registered on 20 May 2025 by ISGlobal (CIF: G65341695) with timestamp certificate #52548973 issued by Coloriuris S.L.  
-> Authors: Robert Albero Gallego, Laia Diez Ahijado, Natalia Rakislova, Jaume Ordi.
+> © 2024 FUNDACIÓN PRIVADA INSTITUTO DE SALUD GLOBAL BARCELONA, FUNDACIÓ DE RECERCA CLÍNIC BARCELONA – INSTITUT D’INVESTIGACIONS BIOMÈDIQUES AUGUST PI I SUNYER, HOSPITAL CLÍNIC BARCELONA. All rights reserved. Registered Coloriuris 20/05/2025.
 
 
 <div style="display: flex; justify-content: center; gap: 20px;">
